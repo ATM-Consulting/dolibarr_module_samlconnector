@@ -1,0 +1,16 @@
+ModuleSamlConnectorName = SamlConnector
+ModuleSamlConnectorDesc = SamlConnector description
+
+# Admin page
+SamlConnectorSetup = SamlConnector setup
+Settings = Settings
+SamlConnectorSetupPage = SamlConnector setup page
+SAMLCONNECTOR_MYPARAM1 = My param 1
+SAMLCONNECTOR_MYPARAM1Tooltip = My param 1 tooltip
+SAMLCONNECTOR_MYPARAM2=My param 2
+SAMLCONNECTOR_MYPARAM2Tooltip=My param 2 tooltip
+
+# About page
+About = About
+SamlConnectorAbout = About SamlConnector
+SamlConnectorAboutPage = SamlConnector about page
