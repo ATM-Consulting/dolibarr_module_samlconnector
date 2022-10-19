@@ -5,10 +5,15 @@ ModuleSamlConnectorDesc = SamlConnector description
 SamlConnectorSetup = SamlConnector setup
 Settings = Settings
 SamlConnectorSetupPage = SamlConnector setup page
-SAMLCONNECTOR_MYPARAM1 = My param 1
-SAMLCONNECTOR_MYPARAM1Tooltip = My param 1 tooltip
-SAMLCONNECTOR_MYPARAM2=My param 2
-SAMLCONNECTOR_MYPARAM2Tooltip=My param 2 tooltip
+SamlConnectorAdminTitleTabSP = Service Provider (SP)
+SamlConnectorAdminTitleTabIDP = Identity Provider (IDP)
+SAMLCONNECTOR_SP_CERT_PATH = SP certificate file path
+SAMLCONNECTOR_SP_PRIV_KEY_PATH = SP certificate private key file path
+SAMLCONNECTOR_SP_METADATA_PATH = SP metadata XML URL
+SAMLCONNECTOR_SP_ACS_URL = SP Assertion Consumer Service (ASC) URL
+SAMLCONNECTOR_SP_SLS_URL = SP Single Logout Service (SLS) URL
+SAMLCONNECTOR_IDP_URL = IDP URL
+SAMLCONNECTOR_IDP_METADATA_XML_PATH = IDP metadata XML file path
 
 # About page
 About = About

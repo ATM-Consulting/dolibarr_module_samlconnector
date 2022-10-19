@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    '98f1e8d9fb5f3d77e1b7e841e9baa661' => $vendorDir . '/saml_settings.php',
+    '98f1e8d9fb5f3d77e1b7e841e9baa661' => $vendorDir . '/samlconnectorSettings.php',
 );

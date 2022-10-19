@@ -7,7 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInit4da9aff0ec2e7148740bae027d257091
 {
     public static $files = array (
-        '98f1e8d9fb5f3d77e1b7e841e9baa661' => __DIR__ . '/..' . '/saml_settings.php',
+        '98f1e8d9fb5f3d77e1b7e841e9baa661' => __DIR__ . '/..' . '/samlconnectorSettings.php',
     );
 
     public static $prefixLengthsPsr4 = array (

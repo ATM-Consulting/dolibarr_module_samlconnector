@@ -41,6 +41,35 @@ if (empty($dolibarr_nocache)) header('Cache-Control: max-age=3600, public, must-
 else header('Cache-Control: no-cache');
 ?>
 
-/* Javascript library of module SAML Connector */
+function copyToClipBoardCommand(value) {
+    navigator.clipboard.writeText(value);
+}
 
+function copyToClipBoardAnimation(el, cpResult = true) {
+    let checkedIconClass = 'fa fa-check';
+    let errorIconClass = 'fa fa-exclamation-triangle';
 
+    let iconEl = el.find('.fa-clipboard, .fa-check, .fa-exclamation-triangle');
+    let idleIconClass = 'fa fa-clipboard';
+
+    iconEl.slideUp(200, function() {
+        if(cpResult) {
+            iconEl.attr('class', checkedIconClass);
+        }
+        else {
+            iconEl.attr('class', errorIconClass);
+        }
+
+        iconEl.slideDown(200).delay(1200).slideUp(200, function() {
+            iconEl.attr('class', idleIconClass);
+            iconEl.slideDown(200);
+        });
+    });
+}
+
+$(document).ready(function() {
+    $('body').on('click', '.samlCopyClipboard', function() {
+        copyToClipBoardCommand($(this).find('span').text());
+        copyToClipBoardAnimation($(this));
+    });
+});

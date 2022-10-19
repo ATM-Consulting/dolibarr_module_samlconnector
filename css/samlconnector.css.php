@@ -39,4 +39,23 @@ else header('Cache-Control: no-cache');
 
 ?>
 
-.myclasscss {}
+.samlCopyClipboard > .fa {
+    opacity: 0;
+    color: #666;
+    -webkit-transition: opacity 0.3s;
+    transition: opacity 0.3s;
+}
+
+.samlCopyClipboard .fa.fa-check {
+    color: green;
+}
+.samlCopyClipboard > .fa.fa-exclamation-triangle {
+    color: red;
+}
+
+.samlCopyClipboard {
+    color: #6e6768;
+    vertical-align: middle;
+    max-height: 16px;
+    max-width: 16px;
+}
