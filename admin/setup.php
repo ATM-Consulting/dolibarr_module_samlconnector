@@ -23,7 +23,6 @@ for($i = 0 ; $i < 5 && ! $res ; $i++) $res = @include str_repeat('../', $i).$mai
 global $langs, $user, $hookmanager, $db, $conf;
 
 // Libraries
-if(! class_exists('Project')) require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once __DIR__.'/../lib/samlconnector.lib.php';
 

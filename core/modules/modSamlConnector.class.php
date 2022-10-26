@@ -143,8 +143,8 @@ class modSamlConnector extends DolibarrModules {
         //                             2 => array('SAMLCONNECTOR_MYNEWCONST2', 'chaine', 'myvalue', 'This is another constant to add', 0, 'current', 1)
         // );
         $this->const = [
-            1 => ['SAML_SSO', 'chaine', 'avalue', 'SSO Url', 1, 'allentities', 1],
-            2 => ['SAML_SSL', 'chaine', 'avalue', 'SLO Url', 1, 'allentities', 1]
+//            1 => ['SAML_SSO', 'chaine', 'avalue', 'SSO Url', 1, 'allentities', 1],
+//            2 => ['SAML_SSL', 'chaine', 'avalue', 'SLO Url', 1, 'allentities', 1]
         ];
 
         // Some keys to add into the overwriting translation tables

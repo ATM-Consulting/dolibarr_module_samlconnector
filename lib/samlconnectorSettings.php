@@ -9,11 +9,11 @@ use OneLogin\Saml2\Auth;
  */
 function saml_settings(): array {
     global $conf;
-    $saml_url_root = dol_buildpath('/samlconnector');
+    $saml_url_root = dol_buildpath('/samlconnector', 2);
 
     $certContent = $privKeyContent = '';
-    if(file_exists($conf->global->SAMLCONNECTOR_CERT_PATH)) $certContent = file_get_contents($conf->global->SAMLCONNECTOR_CERT_PATH);
-    if(file_exists($conf->global->SAMLCONNECTOR_PRIV_KEY_PATH)) $privKeyContent = file_get_contents($conf->global->SAMLCONNECTOR_PRIV_KEY_PATH);
+    if(file_exists($conf->global->SAMLCONNECTOR_SP_CERT_PATH)) $certContent = file_get_contents($conf->global->SAMLCONNECTOR_SP_CERT_PATH);
+    if(file_exists($conf->global->SAMLCONNECTOR_SP_PRIV_KEY_PATH)) $privKeyContent = file_get_contents($conf->global->SAMLCONNECTOR_SP_PRIV_KEY_PATH);
 
     $settings = [
         // If 'strict' is True, then the PHP Toolkit will reject unsigned
@@ -176,7 +176,7 @@ function saml_settings(): array {
 
             // Indicates whether the <samlp:AuthnRequest> messages sent by this SP
             // will be signed.  [Metadata of the SP will offer this info]
-            'authnRequestsSigned' => false,
+            'authnRequestsSigned' => true,
 
             // Indicates whether the <samlp:logoutRequest> messages sent by this SP
             // will be signed.
@@ -198,7 +198,7 @@ function saml_settings(): array {
 
             // Indicates a requirement for the <samlp:Response>, <samlp:LogoutRequest>
             // and <samlp:LogoutResponse> elements received by this SP to be signed.
-            'wantMessagesSigned' => true,
+            'wantMessagesSigned' => false,
 
             // Indicates a requirement for the <saml:Assertion> elements received by
             // this SP to be encrypted.
@@ -206,7 +206,7 @@ function saml_settings(): array {
 
             // Indicates a requirement for the <saml:Assertion> elements received by
             // this SP to be signed. [Metadata of the SP will offer this info]
-            'wantAssertionsSigned' => false,
+            'wantAssertionsSigned' => true,
 
             // Indicates a requirement for the NameID element on the SAMLResponse
             // received by this SP to be present.
@@ -278,7 +278,10 @@ function saml_settings(): array {
 
     $settings = array_merge($settings, $advancedSettings);
 
-    $idp_metadata = IdPMetadataParser::parseRemoteXML('https://account.epitanime.com/saml2/idp/metadata.php');
+    $idpMetadataXml = '';
+    if(file_exists($conf->global->SAMLCONNECTOR_IDP_METADATA_XML_PATH)) $idpMetadataXml = file_get_contents($conf->global->SAMLCONNECTOR_IDP_METADATA_XML_PATH);
+
+    $idp_metadata = IdPMetadataParser::parseRemoteXML($idpMetadataXml);
     $settings_compiled = IdPMetadataParser::injectIntoSettings($settings, $idp_metadata);
     $settings_compiled['sp'] = $settings['sp'];
     return $settings_compiled;
