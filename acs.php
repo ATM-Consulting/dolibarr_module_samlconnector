@@ -40,10 +40,10 @@ if($login->isAuthenticated()) {
     $res = $user->fetch('', $login->getNameId());
 
     if(! empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER) || ! empty($conf->global->SAMLCONNECTOR_UPDATE_USER_EVERYTIME)) {
-        $user->firstname = $login->getAttribute('givenName')[0];
-        $user->lastname = $login->getAttribute('sn')[0];
+        $user->firstname = $login->getAttribute($conf->global->SAMLCONNECTOR_MAPPING_USER_FIRSTNAME)[0];
+        $user->lastname = $login->getAttribute($conf->global->SAMLCONNECTOR_MAPPING_USER_LASTNAME)[0];
         $user->admin = in_array('ADMINISTRATOR', $login->getAttribute('type')) ? 1 : 0;
-        $user->email = $login->getAttribute('mail')[0];
+        $user->email = $login->getAttribute($conf->global->SAMLCONNECTOR_MAPPING_USER_EMAIL)[0];
     }
 
     if($res <= 0 && ! empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER)) {
