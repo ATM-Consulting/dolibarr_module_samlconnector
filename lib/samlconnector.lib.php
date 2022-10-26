@@ -33,12 +33,10 @@ function samlconnectorAdminPrepareHead(): array {
     $head[$h][2] = 'settings';
     $h++;
 
-    /*
-    $head[$h][0] = dol_buildpath('/samlconnector/admin/myobject_extrafields.php', 1);
-    $head[$h][1] = $langs->trans('ExtraFields');
-    $head[$h][2] = 'myobject_extrafields';
+    $head[$h][0] = dol_buildpath('/samlconnector/admin/samlSyncUsers.php', 1);
+    $head[$h][1] = $langs->trans('samlSetupSyncUsers');
+    $head[$h][2] = 'samlSyncUsers';
     $h++;
-    */
 
     $head[$h][0] = dol_buildpath('/samlconnector/admin/about.php', 1);
     $head[$h][1] = $langs->trans('About');

@@ -3,6 +3,7 @@ ModuleSamlConnectorDesc = SamlConnector description
 
 # Admin page
 SamlConnectorSetup = SamlConnector setup
+samlSetupSyncUsers = User sync
 Settings = Settings
 SamlConnectorSetupPage = SamlConnector setup page
 SamlConnectorAdminTitleTabSP = Service Provider (SP)
@@ -14,6 +15,16 @@ SAMLCONNECTOR_SP_ACS_URL = SP Assertion Consumer Service (ASC) URL
 SAMLCONNECTOR_SP_SLS_URL = SP Single Logout Service (SLS) URL
 SAMLCONNECTOR_IDP_URL = IDP URL
 SAMLCONNECTOR_IDP_METADATA_XML_PATH = IDP metadata XML file path
+
+# User sync admin
+SamlConnectorSyncUserAdminGlobalTitleTab = Global synchronization options
+SamlConnectorSyncUserAdminMappingTitleTab = Synchronization mapping
+SAMLCONNECTOR_CREATE_UNEXISTING_USER = Create unexisting users in Dolibarr
+SAMLCONNECTOR_UPDATE_USER_EVERYTIME = Update Dolibarr users on every connection
+SAMLCONNECTOR_MAPPING_USER_SEARCH_KEY = Field used to search into Dolibarr
+SAMLCONNECTOR_MAPPING_USER_LASTNAME = Lastname
+SAMLCONNECTOR_MAPPING_USER_FIRSTNAME = Firstname
+SAMLCONNECTOR_MAPPING_USER_EMAIL = Email
 
 # About page
 About = About

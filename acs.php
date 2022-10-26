@@ -38,59 +38,64 @@ if($login->isAuthenticated()) {
     $admin->fetch('', 'admin');
 
     $res = $user->fetch('', $login->getNameId());
-    $user->firstname = $login->getAttribute('givenName')[0];
-    $user->lastname = $login->getAttribute('sn')[0];
-    $user->admin = in_array('ADMINISTRATOR', $login->getAttribute('type')) ? 1 : 0;
-    $user->email = $login->getAttribute('mail')[0];
 
-    if($res <= 0) {
+    if(! empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER) || ! empty($conf->global->SAMLCONNECTOR_UPDATE_USER_EVERYTIME)) {
+        $user->firstname = $login->getAttribute('givenName')[0];
+        $user->lastname = $login->getAttribute('sn')[0];
+        $user->admin = in_array('ADMINISTRATOR', $login->getAttribute('type')) ? 1 : 0;
+        $user->email = $login->getAttribute('mail')[0];
+    }
+
+    if($res <= 0 && ! empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER)) {
         $user->login = $login->getNameId();
         $user->create($admin);
     }
-    else {
+    elseif($res > 0 && ! empty($conf->global->SAMLCONNECTOR_UPDATE_USER_EVERYTIME)) {
         $user->update($admin);
     }
 
-    $_SESSION['dol_login'] = $user->login;
-    $_SESSION['dol_authmode'] = 'saml';
-    $_SESSION['dol_tz'] = $dol_tz ?? '';
-    $_SESSION['dol_tz_string'] = $dol_tz_string ?? '';
-    $_SESSION['dol_dst'] = $dol_dst ?? '';
-    $_SESSION['dol_dst_observed'] = $dol_dst_observed ?? '';
-    $_SESSION['dol_dst_first'] = $dol_dst_first ?? '';
-    $_SESSION['dol_dst_second'] = $dol_dst_second ?? '';
-    $_SESSION['dol_screenwidth'] = $dol_screenwidth ?? '';
-    $_SESSION['dol_screenheight'] = $dol_screenheight ?? '';
-    $_SESSION['dol_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
-    $_SESSION['dol_entity'] = $conf->entity;
+    if(! empty($user->login)) {
+        $_SESSION['dol_login'] = $user->login;
+        $_SESSION['dol_authmode'] = 'saml';
+        $_SESSION['dol_tz'] = $dol_tz ?? '';
+        $_SESSION['dol_tz_string'] = $dol_tz_string ?? '';
+        $_SESSION['dol_dst'] = $dol_dst ?? '';
+        $_SESSION['dol_dst_observed'] = $dol_dst_observed ?? '';
+        $_SESSION['dol_dst_first'] = $dol_dst_first ?? '';
+        $_SESSION['dol_dst_second'] = $dol_dst_second ?? '';
+        $_SESSION['dol_screenwidth'] = $dol_screenwidth ?? '';
+        $_SESSION['dol_screenheight'] = $dol_screenheight ?? '';
+        $_SESSION['dol_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
+        $_SESSION['dol_entity'] = $conf->entity;
 
-    // Store value into session (values stored only if defined)
-    if(! empty($dol_hide_topmenu)) $_SESSION['dol_hide_topmenu'] = $dol_hide_topmenu;
-    if(! empty($dol_hide_leftmenu)) $_SESSION['dol_hide_leftmenu'] = $dol_hide_leftmenu;
-    if(! empty($dol_optimize_smallscreen)) $_SESSION['dol_optimize_smallscreen'] = $dol_optimize_smallscreen;
-    if(! empty($dol_no_mouse_hover)) $_SESSION['dol_no_mouse_hover'] = $dol_no_mouse_hover;
-    if(! empty($dol_use_jmobile)) $_SESSION['dol_use_jmobile'] = $dol_use_jmobile;
+        // Store value into session (values stored only if defined)
+        if(! empty($dol_hide_topmenu)) $_SESSION['dol_hide_topmenu'] = $dol_hide_topmenu;
+        if(! empty($dol_hide_leftmenu)) $_SESSION['dol_hide_leftmenu'] = $dol_hide_leftmenu;
+        if(! empty($dol_optimize_smallscreen)) $_SESSION['dol_optimize_smallscreen'] = $dol_optimize_smallscreen;
+        if(! empty($dol_no_mouse_hover)) $_SESSION['dol_no_mouse_hover'] = $dol_no_mouse_hover;
+        if(! empty($dol_use_jmobile)) $_SESSION['dol_use_jmobile'] = $dol_use_jmobile;
 
-    dol_syslog("This is a new started user session. _SESSION['dol_login']=".$_SESSION['dol_login'].' Session id='.session_id());
+        dol_syslog("This is a new started user session. _SESSION['dol_login']=".$_SESSION['dol_login'].' Session id='.session_id());
 
-    $db->begin();
-    $user->update_last_login_date();
+        $db->begin();
+        $user->update_last_login_date();
 
-    $loginfo = 'TZ='.$_SESSION['dol_tz'].';TZString='.$_SESSION['dol_tz_string'].';Screen='.$_SESSION['dol_screenwidth'].'x'.$_SESSION['dol_screenheight'];
+        $loginfo = 'TZ='.$_SESSION['dol_tz'].';TZString='.$_SESSION['dol_tz_string'].';Screen='.$_SESSION['dol_screenwidth'].'x'.$_SESSION['dol_screenheight'];
 
-    // Call triggers for the "security events" log
-    $user->trigger_mesg = $loginfo;
-    // Call triggers
-    include_once DOL_DOCUMENT_ROOT.'/core/class/interfaces.class.php';
-    $interface = new Interfaces($db);
-    $result = $interface->run_triggers('USER_LOGIN', $user, $user, $langs, $conf);
+        // Call triggers for the "security events" log
+        $user->trigger_mesg = $loginfo;
+        // Call triggers
+        include_once DOL_DOCUMENT_ROOT.'/core/class/interfaces.class.php';
+        $interface = new Interfaces($db);
+        $result = $interface->run_triggers('USER_LOGIN', $user, $user, $langs, $conf);
 
-    $hookmanager->initHooks(['login']);
-    $parameters = ['dol_authmode' => 'saml', 'dol_loginfo' => $loginfo];
-    $reshook = $hookmanager->executeHooks('afterLogin', $parameters, $user, $action);    // Note that $action and $object may have been modified by some hooks
+        $hookmanager->initHooks(['login']);
+        $parameters = ['dol_authmode' => 'saml', 'dol_loginfo' => $loginfo];
+        $reshook = $hookmanager->executeHooks('afterLogin', $parameters, $user, $action);    // Note that $action and $object may have been modified by some hooks
 
-    $db->commit();
-    header('Location: '.DOL_URL_ROOT);
+        $db->commit();
+        header('Location: '.DOL_URL_ROOT);
+    }
 }
 
 if(isset($_REQUEST['RelayState'])) {
