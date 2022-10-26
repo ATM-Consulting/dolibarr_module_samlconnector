@@ -121,7 +121,7 @@ if($action == 'editSP') {
     }
     else {
         print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-        print '<input type="hidden" name="token" value="'.newToken().'">';
+        print '<input type="hidden" name="token" value="'.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">';
         print '<input type="hidden" name="action" value="update">';
 
         print '<table class="noborder centpercent">';
@@ -308,7 +308,7 @@ else {
 
     if($setupnotempty) {
         print '<div class="tabsAction">';
-        print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editSP&token='.newToken().'">'.$langs->trans('Modify').'</a>';
+        print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editSP&token='.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">'.$langs->trans('Modify').'</a>';
         print '</div>';
     }
 }
@@ -323,7 +323,7 @@ if($action == 'editIDP') {
     }
     else {
         print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-        print '<input type="hidden" name="token" value="'.newToken().'">';
+        print '<input type="hidden" name="token" value="'.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">';
         print '<input type="hidden" name="action" value="update">';
 
         print '<table class="noborder centpercent">';
@@ -501,7 +501,7 @@ else {
 
     if($setupnotempty) {
         print '<div class="tabsAction">';
-        print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editIDP&token='.newToken().'">'.$langs->trans('Modify').'</a>';
+        print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editIDP&token='.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">'.$langs->trans('Modify').'</a>';
         print '</div>';
     }
 }
