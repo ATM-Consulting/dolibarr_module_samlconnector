@@ -89,7 +89,34 @@ $dirmodels = array_merge(['/'], $conf->modules_parts['models']);
  */
 // For standard purpose
 $arrayofparameters = array_merge($parameterSP, $parameterIDP);
-include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
+
+if(floatval(DOL_VERSION) >= 12.0) {
+    include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
+}
+elseif(floatval(DOL_VERSION) < 12.0 && $action === 'update') {
+    $db->begin();
+
+    $ok = true;
+    foreach($arrayofparameters as $key => $val) {
+        // Modify constant only if key was posted (avoid resetting key to the null value)
+        if(GETPOSTISSET($key)) {
+            $result = dolibarr_set_const($db, $key, GETPOST($key, 'alpha'), 'chaine', 0, '', $conf->entity);
+            if($result < 0) {
+                $ok = false;
+                break;
+            }
+        }
+    }
+
+    if(! $error) {
+        $db->commit();
+        setEventMessages($langs->trans('SetupSaved'), []);
+    }
+    else {
+        $db->rollback();
+        setEventMessages($langs->trans('SetupNotSaved'), [], 'errors');
+    }
+}
 
 /*
  * View
