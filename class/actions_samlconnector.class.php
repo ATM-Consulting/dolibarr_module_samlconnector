@@ -224,7 +224,7 @@ class ActionsSamlConnector {
         global $langs;
 
         $url = dol_buildpath('/samlconnector', 1).'/login.php';
-        $this->results = ['table' => '<p><a href="'.$url.'">'.$langs->trans('ConnectBySaml').'</a></p>'];
+        $this->results = ['table' => '<p><a href="'.$url.'">'.$langs->trans('SamlConnectorConnectBySaml').'</a></p>'];
 
         //Force login
         include dirname(__FILE__).'/../lib/autoload.php';

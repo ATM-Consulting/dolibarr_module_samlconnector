@@ -278,10 +278,9 @@ function saml_settings(): array {
 
     $settings = array_merge($settings, $advancedSettings);
 
-    $idpMetadataXml = '';
-    if(file_exists($conf->global->SAMLCONNECTOR_IDP_METADATA_XML_PATH)) $idpMetadataXml = file_get_contents($conf->global->SAMLCONNECTOR_IDP_METADATA_XML_PATH);
+    if($conf->global->SAMLCONNECTOR_IDP_METADATA_SOURCE == 'localFile') $idp_metadata = IdPMetadataParser::parseFileXML($conf->global->SAMLCONNECTOR_IDP_METADATA_XML_PATH);
+    else $idp_metadata = IdPMetadataParser::parseRemoteXML($conf->global->SAMLCONNECTOR_IDP_METADATA_URL); // Url
 
-    $idp_metadata = IdPMetadataParser::parseRemoteXML($idpMetadataXml);
     $settings_compiled = IdPMetadataParser::injectIntoSettings($settings, $idp_metadata);
     $settings_compiled['sp'] = $settings['sp'];
     return $settings_compiled;

@@ -52,7 +52,8 @@ $parameterSP = [
 
 // Savable conf for IDP
 $parameterIDP = [
-    'SAMLCONNECTOR_IDP_URL' => ['type' => 'string', 'enabled' => 1],
+    'SAMLCONNECTOR_IDP_METADATA_SOURCE' => ['type' => 'array', 'data' => ['url' => 'url', 'localFile' => 'localFile'], 'enabled' => 1],
+    'SAMLCONNECTOR_IDP_METADATA_URL' => ['type' => 'string', 'enabled' => 1],
     'SAMLCONNECTOR_IDP_METADATA_XML_PATH' => ['type' => 'string', 'enabled' => 1]
 ];
 
@@ -418,6 +419,11 @@ if($action == 'editIDP') {
                         $form->select_produits($selected, $constname);
                     }
                 }
+                else if($val['type'] == 'array') {
+                    $data = $val['data'];
+
+                    print Form::selectarray($constname, $data, $conf->global->$constname, 1, 0, 0, '', 1);
+                }
                 else {
                     print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth400' : $val['css']).'" value="'.$conf->global->{$constname}.'">';
                 }
@@ -514,6 +520,9 @@ else {
                         else if($resprod < 0) {
                             setEventMessages(null, $product->errors, 'errors');
                         }
+                    }
+                    else if($val['type'] == 'array') {
+                        print $langs->trans($conf->global->{$constname});
                     }
                     else {
                         print $conf->global->{$constname};
