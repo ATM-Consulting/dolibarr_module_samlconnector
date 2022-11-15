@@ -72,7 +72,7 @@ function saml_settings(): array {
             // returned to the requester, in this case our SP.
             'singleLogoutService' => [
                 // URL Location where the <Response> from the IdP will be returned
-                'url' => $saml_url_root.'sls.php',
+                'url' => $saml_url_root.'/sls.php',
                 // SAML protocol binding to be used when returning the <Response>
                 // message. OneLogin Toolkit supports the HTTP-Redirect binding
                 // only for this endpoint.

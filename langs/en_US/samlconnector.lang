@@ -1,6 +1,8 @@
 ModuleSamlConnectorName = SamlConnector
 ModuleSamlConnectorDesc = SamlConnector description
 
+ConnectBySaml = Connect by SAML
+
 # Admin page
 SamlConnectorSetup = SamlConnector setup
 samlSetupSyncUsers = User sync
