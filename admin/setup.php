@@ -52,10 +52,16 @@ $parameterSP = [
 
 // Savable conf for IDP
 $parameterIDP = [
-    'SAMLCONNECTOR_IDP_METADATA_SOURCE' => ['type' => 'array', 'data' => ['url' => 'url', 'localFile' => 'localFile'], 'enabled' => 1],
-    'SAMLCONNECTOR_IDP_METADATA_URL' => ['type' => 'string', 'enabled' => 1],
-    'SAMLCONNECTOR_IDP_METADATA_XML_PATH' => ['type' => 'string', 'enabled' => 1]
+    'SAMLCONNECTOR_IDP_DISPLAY_BUTTON' => ['type' => 'yesno', 'enabled' => 1],
+    'SAMLCONNECTOR_MANAGE_MULTIPLE_IDP' => ['type' => 'yesno', 'enabled' => 1],
 ];
+//Parameter for all idps
+$parameterAllIDP = [
+	'SAMLCONNECTOR_IDP_METADATA_SOURCE' => ['type' => 'array', 'data' => ['url' => 'url', 'localFile' => 'localFile'], 'enabled' => 1],
+	'SAMLCONNECTOR_IDP_METADATA_URL' => ['type' => 'string', 'enabled' => 1],
+	'SAMLCONNECTOR_IDP_METADATA_XML_PATH' => ['type' => 'string', 'enabled' => 1]
+];
+$parameterIDP = array_merge($parameterIDP, $parameterAllIDP);
 
 $arrayofparameters = [
     //    'SAMLCONNECTOR_MYPARAM0' => ['type' => 'yesno', 'enabled' => 1]
@@ -363,71 +369,10 @@ if($action == 'editIDP') {
                 print '<tr class="oddeven"><td>';
                 $tooltiphelp = $langs->trans($constname.'Tooltip') != $constname.'Tooltip' ? $langs->trans($constname.'Tooltip') : '';
                 print '<span id="helplink'.$constname.'" class="spanforparamtooltip">'.$form->textwithpicto($langs->trans($constname), $tooltiphelp, 1, 'info', '', 0, 3, 'tootips'.$constname).'</span>';
-                print '</td><td>';
-
-                if($val['type'] == 'textarea') {
-                    print '<textarea class="flat" name="'.$constname.'" id="'.$constname.'" cols="50" rows="5" wrap="soft">'."\n";
-                    print $conf->global->{$constname};
-                    print "</textarea>\n";
-                }
-                else if($val['type'] == 'html') {
-                    require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
-                    $doleditor = new DolEditor($constname, $conf->global->{$constname}, '', 160, 'dolibarr_notes', '', false, false, $conf->fckeditor->enabled, ROWS_5, '90%');
-                    $doleditor->Create();
-                }
-                else if($val['type'] == 'yesno') {
-                    print $form->selectyesno($constname, $conf->global->{$constname}, 1);
-                }
-                else if(preg_match('/category:/', $val['type'])) {
-                    require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
-                    require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
-                    $formother = new FormOther($db);
-
-                    $tmp = explode(':', $val['type']);
-                    print img_picto('', 'category', 'class="pictofixedwidth"');
-                    print $formother->select_categories($tmp[1], $conf->global->{$constname}, $constname, 0, $langs->trans('CustomersProspectsCategoriesShort'));
-                }
-                else if(preg_match('/thirdparty_type/', $val['type'])) {
-                    require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
-                    $formcompany = new FormCompany($db);
-                    print $formcompany->selectProspectCustomerType($conf->global->{$constname}, $constname);
-                }
-                else if($val['type'] == 'securekey') {
-                    print '<input required="required" type="text" class="flat" id="'.$constname.'" name="'.$constname.'" value="'.(GETPOST($constname, 'alpha') ? GETPOST($constname, 'alpha') : $conf->global->{$constname}).'" size="40">';
-                    if(! empty($conf->use_javascript_ajax)) {
-                        print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token'.$constname.'" class="linkobject"');
-                    }
-                    if(! empty($conf->use_javascript_ajax)) {
-                        print "\n".'<script type="text/javascript">';
-                        print '$(document).ready(function () {
-                        $("#generate_token'.$constname.'").click(function() {
-                	        $.get( "'.DOL_URL_ROOT.'/core/ajax/security.php", {
-                		      action: \'getrandompassword\',
-                		      generic: true
-    				        },
-    				        function(token) {
-    					       $("#'.$constname.'").val(token);
-            				});
-                         });
-                    });';
-                        print '</script>';
-                    }
-                }
-                else if($val['type'] == 'product') {
-                    if(! empty($conf->product->enabled) || ! empty($conf->service->enabled)) {
-                        $selected = empty($conf->global->$constname) ? '' : $conf->global->$constname;
-                        $form->select_produits($selected, $constname);
-                    }
-                }
-                else if($val['type'] == 'array') {
-                    $data = $val['data'];
-
-                    print Form::selectarray($constname, $data, $conf->global->$constname, 1, 0, 0, '', 1);
-                }
-                else {
-                    print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth400' : $val['css']).'" value="'.$conf->global->{$constname}.'">';
-                }
-                print '</td></tr>';
+                print '</td>';
+                printConfInput($constname, $val);
+                print '</td>';
+                print '</tr>';
             }
         }
         print '</table>';
@@ -458,7 +403,7 @@ else {
                     $setupnotempty++;
                     print '<tr class="oddeven"><td>';
                     $tooltiphelp = $langs->trans($constname.'Tooltip') != $constname.'Tooltip' ? $langs->trans($constname.'Tooltip') : '';
-                    print $form->textwithpicto($langs->trans($constname), $tooltiphelp);
+                    print '<span id="helplink'.$constname.'" class="spanforparamtooltip">'.$form->textwithpicto($langs->trans($constname), $tooltiphelp).'</span>';
                     print '</td><td>';
 
                     if($val['type'] == 'textarea') {
@@ -542,12 +487,102 @@ else {
     }
 }
 
+print '<form action="'.$_SERVER['PHP_SELF'].'" method="POST">';
+print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<input type="hidden" name="action" value="addIDP">';
+print '<div class="div-table-responsive-no-min">';
+print load_fiche_titre('AddIDP','','');
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>'.$langs->trans('Label').'</td>';
+print '<td>'.$langs->trans('IDPType').'</td>';
+if(!empty($parameterAllIDP)) {
+    foreach($parameterAllIDP as $constname => $val) {
+        print '<td>'.$langs->trans($constname).'</td>';
+    }
+}
+print '<td>'.$langs->trans('Active').'</td>';
+print '<td></td>';
+print '</tr>';
+print '<!-- line to add new entry -->';
+print '<tr class="oddeven nodrag nodrop nohover">';
+print '<td><input type="text" name="IDPLabel"/></td>';
+print '<td><input type="text" name="IDPType"/></td>';//TODO Dico
+if(!empty($parameterAllIDP)) {
+    foreach($parameterAllIDP as $constname => $val) {
+        printConfInput($constname, $val);
+    }
+}
+print '<td>'.$form->selectyesno('IDPActive').'</td>';
+print '<td><input type="submit" class="button" name="actionadd" value="'.$langs->trans('Add').'"/></td>';
+print '</tr>';
+print '</table>';
+print '</div>';
+print '</form>';
+
+
+
+
 if(empty($setupnotempty)) {
     print '<br>'.$langs->trans('NothingToSetup');
 }
 
 // Page end
 print dol_get_fiche_end();
+
+
+
+?>
+<script type="text/javascript">
+	$(document).ready(function(){
+        //Pour décocher l'input à la volée
+        $('#del_SAMLCONNECTOR_IDP_DISPLAY_BUTTON').on('click', function () {
+            if ($('#SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').length == 0 && $('#del_SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').is(':visible')) {
+                $('#del_SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').trigger('click');
+            }
+        });
+        $('#SAMLCONNECTOR_IDP_DISPLAY_BUTTON').on('change', function () {
+			if ($('#SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').val() == 1 && $('#SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').length > 0 && $('#SAMLCONNECTOR_IDP_DISPLAY_BUTTON').val() == 0){
+                $('#SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').val('0').trigger('change');
+            }
+        });
+
+
+        showHideLineBySelector('SAMLCONNECTOR_MANAGE_MULTIPLE_IDP', 'SAMLCONNECTOR_IDP_METADATA_SOURCE', true);
+        showHideLineBySelector('SAMLCONNECTOR_MANAGE_MULTIPLE_IDP', 'SAMLCONNECTOR_IDP_METADATA_URL', true);
+        showHideLineBySelector('SAMLCONNECTOR_MANAGE_MULTIPLE_IDP', 'SAMLCONNECTOR_IDP_METADATA_XML_PATH', true);
+        showHideLineBySelector('SAMLCONNECTOR_IDP_DISPLAY_BUTTON', 'SAMLCONNECTOR_MANAGE_MULTIPLE_IDP');
+
+    });
+
+    function showHideConfLine(selector, target, forceShow = false, forceHide = false, hideIfActive = false) {
+        //Si on est en mode edit ou si on est en mode vu et que le bouton est en mode enable ou si nous cliquons sur le bouton pour enable la conf
+        if (!forceHide && (($('#'+selector).val() == 1 && $('#'+selector).length > 0)
+            || ($('#'+selector).length == 0 && $('#del_'+selector).is(':visible'))
+            || forceShow)) {
+            if(hideIfActive) $('#helplink'+target).closest('tr').hide();
+            else $('#helplink'+target).closest('tr').show();
+        } else {
+           	if(hideIfActive) $('#helplink'+target).closest('tr').show();
+            else $('#helplink'+target).closest('tr').hide();
+        }
+    }
+
+    function showHideLineBySelector(selectorTriggered, targetSelector, hideIfActive = false) {
+         $('#set_'+selectorTriggered).on('click', function () {
+            showHideConfLine(selectorTriggered, targetSelector, true, false, hideIfActive);
+        });
+        $('#del_'+selectorTriggered).on('click', function () {
+            showHideConfLine(selectorTriggered, targetSelector, false, true, hideIfActive);
+        });
+        $('#'+selectorTriggered).on('change', function () {
+			showHideConfLine(selectorTriggered, targetSelector, false, false, hideIfActive);
+        });
+        showHideConfLine(selectorTriggered, targetSelector, false, false, hideIfActive);
+    }
+</script>
+<?php
+
 
 llxFooter();
 $db->close();

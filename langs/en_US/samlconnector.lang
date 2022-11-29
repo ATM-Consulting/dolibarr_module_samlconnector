@@ -20,6 +20,9 @@ url = URL
 localFile = Local file
 SAMLCONNECTOR_IDP_METADATA_URL = IDP metadata XML file URL
 SAMLCONNECTOR_IDP_METADATA_XML_PATH = IDP metadata XML file path
+SAMLCONNECTOR_IDP_DISPLAY_BUTTON= Display button(s) on login page for IDP connection(s)
+SAMLCONNECTOR_IDP_DISPLAY_BUTTONTooltip = Instead of having a redirection without login page displayed
+SAMLCONNECTOR_MANAGE_MULTIPLE_IDP = Manage multiple IDP
 
 # User sync admin
 SamlConnectorSyncUserAdminGlobalTitleTab = Global synchronization options
