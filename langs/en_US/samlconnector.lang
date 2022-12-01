@@ -38,3 +38,23 @@ SAMLCONNECTOR_MAPPING_USER_EMAIL = Email
 About = About
 SamlConnectorAbout = About SamlConnector
 SamlConnectorAboutPage = SamlConnector about page
+
+
+Img_path=Image path
+SamlConnectorImgPathHelp=Chemin relatif de l'icone à partir du dossier documents/samlconnector
+MetadataSource=IDP metadata file source
+MetadataURL=IDP metadata XML file URL
+MetadataXMLPath=IDP metadata XML file path
+IdpType=IDP Type
+AddIDP=Add IDP
+SamlConnectorIdpType= Type d'IDP (Connecteur SAML)
+IDPSuccessfullyAdded=IDP Successfully added
+DeleteIDP=Supprimer l'IDP
+ConfirmDeleteIDP=Êtes-vous sur de vouloir supprimer cet IDP ?
+SuccessfullyDeleted=Supprimé avec succès
+MissingIDPLabel=Libellé de l'IDP manquant
+MissingIDPType=Type de l'IDP manquant
+MissingIDPSource=Source du metadata de l'IDP manquant
+MissingIDPFilePathOrUrl=Chemin du fichier ou URL de l'IDP manquant
+IDPDisabled=IDP Désactivé
+IDPEnabled=IDP Activé

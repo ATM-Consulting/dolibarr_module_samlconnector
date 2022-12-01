@@ -25,6 +25,7 @@ global $langs, $user, $hookmanager, $db, $conf;
 // Libraries
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once __DIR__.'/../lib/samlconnector.lib.php';
+require_once __DIR__.'/../class/samlconnectoridp.class.php';
 
 // Translations
 $langs->loadLangs(['admin', 'samlconnector@samlconnector']);
@@ -44,6 +45,11 @@ $value = GETPOST('value', 'alpha');
 $label = GETPOST('label', 'alpha');
 $scandir = GETPOST('scan_dir', 'alpha');
 
+$fk_idp = GETPOST('fk_idp','int');
+
+$form = new Form($db);
+$idp = new SamlConnectorIDP($db);
+
 // Savable conf for SP
 $parameterSP = [
     'SAMLCONNECTOR_SP_CERT_PATH' => ['type' => 'string', 'enabled' => 1],
@@ -54,14 +60,10 @@ $parameterSP = [
 $parameterIDP = [
     'SAMLCONNECTOR_IDP_DISPLAY_BUTTON' => ['type' => 'yesno', 'enabled' => 1],
     'SAMLCONNECTOR_MANAGE_MULTIPLE_IDP' => ['type' => 'yesno', 'enabled' => 1],
-];
-//Parameter for all idps
-$parameterAllIDP = [
-	'SAMLCONNECTOR_IDP_METADATA_SOURCE' => ['type' => 'array', 'data' => ['url' => 'url', 'localFile' => 'localFile'], 'enabled' => 1],
+    'SAMLCONNECTOR_IDP_METADATA_SOURCE' => ['type' => 'array', 'data' => ['url' => 'url', 'localFile' => 'localFile'], 'enabled' => 1],
 	'SAMLCONNECTOR_IDP_METADATA_URL' => ['type' => 'string', 'enabled' => 1],
 	'SAMLCONNECTOR_IDP_METADATA_XML_PATH' => ['type' => 'string', 'enabled' => 1]
 ];
-$parameterIDP = array_merge($parameterIDP, $parameterAllIDP);
 
 $arrayofparameters = [
     //    'SAMLCONNECTOR_MYPARAM0' => ['type' => 'yesno', 'enabled' => 1]
@@ -72,7 +74,6 @@ $arrayofparameters = [
     //    'SAMLCONNECTOR_MYPARAM7' => ['type' => 'securekey', 'enabled' => 1],
     //    'SAMLCONNECTOR_MYPARAM8' => ['type' => 'product', 'enabled' => 1],
 ];
-
 $error = 0;
 $setupnotempty = 0;
 
@@ -97,6 +98,74 @@ $dirmodels = array_merge(['/'], $conf->modules_parts['models']);
 // For standard purpose
 $arrayofparameters = array_merge($parameterSP, $parameterIDP);
 
+if($action == 'disableIDP' || $action == 'enableIDP') {
+    $res = $idp->fetch($fk_idp);
+    if($res > 0) {
+        if($action == 'disableIDP') {
+            $statut = SamlConnectorIDP::STATUS_INACTIVE;
+            $msg = $langs->trans('IDPDisabled');
+        } else {
+            $statut = SamlConnectorIDP::STATUS_ACTIVE;
+            $msg = $langs->trans('IDPEnabled');
+        }
+        $res = $idp->setStatut($statut);
+        if($res > 0) setEventMessage($msg);
+        else setEventMessages($idp->error, $idp->errors, 'errors');
+        header('Location: '.$_SERVER['PHP_SELF']);
+        exit;
+    }
+}
+
+if($action == 'addIDP') {
+    $error = 0;
+    if(!empty($idp->fields)) {
+		foreach($idp->fields as $key => $field) {
+            if(GETPOSTISSET($key)) $idp->{$key} = GETPOST($key, 'none');
+		}
+        if($idp->status < 0) $idp->status = 0;
+		/**
+		 * Errors
+		 */
+        if(empty($idp->label)) {
+            $error++;
+            setEventMessage('MissingIDPLabel','errors');
+        }
+        if(empty($idp->fk_idp_type) || $idp->fk_idp_type == -1) {
+            $error++;
+            setEventMessage('MissingIDPType','errors');
+        }
+        if(empty($idp->metadata_source)) {
+            $error++;
+            setEventMessage('MissingIDPSource','errors');
+        }
+        if(empty($idp->metadata_url) && empty($idp->metadata_xml_path)) {
+            $error++;
+            setEventMessage('MissingIDPFilePathOrUrl','errors');
+        }
+        /**
+		 * Fin gestion erreurs
+		 */
+
+        if(empty($error)) {
+			$res = $idp->create($user);
+			if($res < 0) setEventMessages($idp->error, $idp->errors, 'errors');
+			else setEventMessage($langs->trans('IDPSuccessfullyAdded'));
+			header('Location: '.$_SERVER['PHP_SELF']);
+			exit;
+		}
+	}
+}
+
+if($action == 'confirm_deleteIDP') {
+	$res = $idp->fetch($fk_idp);
+	if($res > 0) {
+		$resDel = $idp->delete($user);
+		if($resDel > 0) setEventMessage($langs->trans('SuccessfullyDeleted'));
+		else setEventMessages($idp->error, $idp->errors, 'errors');
+		header('Location: '.$_SERVER['PHP_SELF']);
+		exit;
+	}
+}
 if(floatval(DOL_VERSION) >= 12.0) {
     include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
 }
@@ -129,7 +198,6 @@ elseif(floatval(DOL_VERSION) < 12.0 && $action === 'update') {
  * View
  */
 
-$form = new Form($db);
 
 $help_url = '';
 $page_name = 'SamlConnectorSetup';
@@ -144,6 +212,9 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 // Configuration header
 $head = samlconnectorAdminPrepareHead();
 print dol_get_fiche_head($head, 'settings', $langs->trans($page_name), -1, 'samlconnector@samlconnector');
+if($action == 'deleteIDP') {
+	print $form->formconfirm($_SERVER['PHP_SELF'].'?fk_idp='.$fk_idp, $langs->trans('DeleteIDP'), $langs->trans('ConfirmDeleteIDP'), 'confirm_deleteIDP', '', '', 1);
+}
 
 // Service Provider (SP) setup part
 print load_fiche_titre($langs->trans('SamlConnectorAdminTitleTabSP'), '', '');
@@ -167,66 +238,9 @@ if($action == 'editSP') {
                 print '<tr class="oddeven"><td>';
                 $tooltiphelp = $langs->trans($constname.'Tooltip') != $constname.'Tooltip' ? $langs->trans($constname.'Tooltip') : '';
                 print '<span id="helplink'.$constname.'" class="spanforparamtooltip">'.$form->textwithpicto($langs->trans($constname), $tooltiphelp, 1, 'info', '', 0, 3, 'tootips'.$constname).'</span>';
-                print '</td><td>';
-
-                if($val['type'] == 'textarea') {
-                    print '<textarea class="flat" name="'.$constname.'" id="'.$constname.'" cols="50" rows="5" wrap="soft">'."\n";
-                    print $conf->global->{$constname};
-                    print "</textarea>\n";
-                }
-                else if($val['type'] == 'html') {
-                    require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
-                    $doleditor = new DolEditor($constname, $conf->global->{$constname}, '', 160, 'dolibarr_notes', '', false, false, $conf->fckeditor->enabled, ROWS_5, '90%');
-                    $doleditor->Create();
-                }
-                else if($val['type'] == 'yesno') {
-                    print $form->selectyesno($constname, $conf->global->{$constname}, 1);
-                }
-                else if(preg_match('/category:/', $val['type'])) {
-                    require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
-                    require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
-                    $formother = new FormOther($db);
-
-                    $tmp = explode(':', $val['type']);
-                    print img_picto('', 'category', 'class="pictofixedwidth"');
-                    print $formother->select_categories($tmp[1], $conf->global->{$constname}, $constname, 0, $langs->trans('CustomersProspectsCategoriesShort'));
-                }
-                else if(preg_match('/thirdparty_type/', $val['type'])) {
-                    require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
-                    $formcompany = new FormCompany($db);
-                    print $formcompany->selectProspectCustomerType($conf->global->{$constname}, $constname);
-                }
-                else if($val['type'] == 'securekey') {
-                    print '<input required="required" type="text" class="flat" id="'.$constname.'" name="'.$constname.'" value="'.(GETPOST($constname, 'alpha') ? GETPOST($constname, 'alpha') : $conf->global->{$constname}).'" size="40">';
-                    if(! empty($conf->use_javascript_ajax)) {
-                        print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token'.$constname.'" class="linkobject"');
-                    }
-                    if(! empty($conf->use_javascript_ajax)) {
-                        print "\n".'<script type="text/javascript">';
-                        print '$(document).ready(function () {
-                        $("#generate_token'.$constname.'").click(function() {
-                	        $.get( "'.DOL_URL_ROOT.'/core/ajax/security.php", {
-                		      action: \'getrandompassword\',
-                		      generic: true
-    				        },
-    				        function(token) {
-    					       $("#'.$constname.'").val(token);
-            				});
-                         });
-                    });';
-                        print '</script>';
-                    }
-                }
-                else if($val['type'] == 'product') {
-                    if(! empty($conf->product->enabled) || ! empty($conf->service->enabled)) {
-                        $selected = empty($conf->global->$constname) ? '' : $conf->global->$constname;
-                        $form->select_produits($selected, $constname);
-                    }
-                }
-                else {
-                    print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth400' : $val['css']).'" value="'.$conf->global->{$constname}.'">';
-                }
-                print '</td></tr>';
+                print '</td>';
+                printConfInput($constname, $val);
+                print '</tr>';
             }
         }
         print '</table>';
@@ -487,40 +501,19 @@ else {
     }
 }
 
-print '<form action="'.$_SERVER['PHP_SELF'].'" method="POST">';
-print '<input type="hidden" name="token" value="'.newToken().'">';
-print '<input type="hidden" name="action" value="addIDP">';
-print '<div class="div-table-responsive-no-min">';
-print load_fiche_titre('AddIDP','','');
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td>'.$langs->trans('Label').'</td>';
-print '<td>'.$langs->trans('IDPType').'</td>';
-if(!empty($parameterAllIDP)) {
-    foreach($parameterAllIDP as $constname => $val) {
-        print '<td>'.$langs->trans($constname).'</td>';
-    }
-}
-print '<td>'.$langs->trans('Active').'</td>';
-print '<td></td>';
-print '</tr>';
-print '<!-- line to add new entry -->';
-print '<tr class="oddeven nodrag nodrop nohover">';
-print '<td><input type="text" name="IDPLabel"/></td>';
-print '<td><input type="text" name="IDPType"/></td>';//TODO Dico
-if(!empty($parameterAllIDP)) {
-    foreach($parameterAllIDP as $constname => $val) {
-        printConfInput($constname, $val);
-    }
-}
-print '<td>'.$form->selectyesno('IDPActive').'</td>';
-print '<td><input type="submit" class="button" name="actionadd" value="'.$langs->trans('Add').'"/></td>';
-print '</tr>';
-print '</table>';
-print '</div>';
-print '</form>';
+//IDP ADD FORM
+if(!in_array($action, array('editIDP', 'editSP'))) {
+	print '<div id="multiple_idp">';
+	$idp->printSetupAddForm();
 
-
+	$TIdps = $idp->fetchAll();
+	if(! empty($TIdps)) {
+		foreach($TIdps as $idp) {
+			$idp->printSetupBloc();
+		}
+	}
+	print '</div>';
+}
 
 
 if(empty($setupnotempty)) {
@@ -529,7 +522,6 @@ if(empty($setupnotempty)) {
 
 // Page end
 print dol_get_fiche_end();
-
 
 
 ?>
@@ -547,6 +539,18 @@ print dol_get_fiche_end();
             }
         });
 
+        if ($('#del_SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').is(':visible')) {
+            $('#multiple_idp').show();
+        } else {
+            $('#multiple_idp').hide();
+        }
+
+        $('#set_SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').on('click', function () {
+            $('#multiple_idp').show();
+        });
+        $('#del_SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').on('click', function () {
+            $('#multiple_idp').hide();
+        });
 
         showHideLineBySelector('SAMLCONNECTOR_MANAGE_MULTIPLE_IDP', 'SAMLCONNECTOR_IDP_METADATA_SOURCE', true);
         showHideLineBySelector('SAMLCONNECTOR_MANAGE_MULTIPLE_IDP', 'SAMLCONNECTOR_IDP_METADATA_URL', true);

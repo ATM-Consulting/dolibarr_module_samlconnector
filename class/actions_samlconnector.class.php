@@ -227,11 +227,11 @@ class ActionsSamlConnector {
         $this->results = ['table' => '<p><a href="'.$url.'">'.$langs->trans('SamlConnectorConnectBySaml').'</a></p>'];
 
         //Force login
-        include dirname(__FILE__).'/../lib/autoload.php';
-        $login = get_saml();
-
-        $newpath = DOL_MAIN_URL_ROOT.'/index.php?mainmenu=home&leftmenu=home';
-        $login->login($newpath);
+//        include dirname(__FILE__).'/../lib/autoload.php';
+//        $login = get_saml();
+//
+//        $newpath = DOL_MAIN_URL_ROOT.'/index.php?mainmenu=home&leftmenu=home';
+//        $login->login($newpath);
     }
 
     /**
