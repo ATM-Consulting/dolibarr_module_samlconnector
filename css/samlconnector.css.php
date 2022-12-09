@@ -59,3 +59,39 @@ else header('Cache-Control: no-cache');
     max-height: 16px;
     max-width: 16px;
 }
+
+.samlConnectorLoginButton {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none !important;
+    color: black !important;
+
+}
+
+.samlConnectorLoginButtonBlock {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.samlConnectorLoginButtonElement {
+    min-width: min(300px, 100%);
+    /*border: 1px solid transparent;*/
+    padding: 8px 10px;
+
+    background-color: white;
+    color: black;
+    margin-top: 15px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: rgb(0 0 0 / 20%) 1px 1px 5px 0;
+    transition: background-color .2s ease-in-out 0s,border-color .2s ease-in-out 0s;
+}
+
+.samlConnectorLoginButton img{
+    float: left;
+    max-height: 21px;
+}

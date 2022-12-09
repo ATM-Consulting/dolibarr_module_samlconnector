@@ -317,13 +317,13 @@ class CSamlConnectorIdpType {
 	 * @return    string                                String with URL
 	 */
 	public function getNomUrl($withpicto = 0, $option = '', $notooltip = 0, $morecss = '', $save_lastsearch_value = -1) {
-		global $langs;
+		global $langs, $conf;
 		$img = '';
 		if(!empty($this->img_path)) {
-			$imgPath = DOL_DATA_ROOT.'/samlconnector/'.ltrim($this->img_path, '/');//TODO
-			if(is_file($imgPath)) $img = '<img style="vertical-align:middle" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=samlconnector&amp;file='.urlencode($this->img_path).'"  height="21"/>&nbsp;&nbsp;&nbsp;';
+			$imgPath = DOL_DATA_ROOT.'/medias/'.ltrim($this->img_path, '/');//TODO
+			if(is_file($imgPath)) $img = '<img style="vertical-align:middle" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=medias&amp;file='.urlencode($this->img_path).'&entity=1"  height="21"/>&nbsp;&nbsp;&nbsp;';
 		}
-
+		if($withpicto === 2 ) return $img;
 		return $img.$langs->trans($this->libelle);
 	}
 }

@@ -51,7 +51,7 @@ class SamlConnectorIDP extends CommonObject
 	 * @var int  Does this object support multicompany module ?
 	 * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
 	 */
-	public $ismultientitymanaged = 0;
+	public $ismultientitymanaged = 1;
 
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes
@@ -1119,6 +1119,21 @@ class SamlConnectorIDP extends CommonObject
         print '<div class="tabsAction">';
         print '<a class="butActionDelete" href="'.$_SERVER['PHP_SELF'].'?action=deleteIDP&fk_idp='.$this->id.'&token='.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">'.$langs->trans('DeleteIDP').'</a>';
         print '</div>';
+	}
+
+	public function getLoginButton() {
+		global $langs;
+		$langs->load('samlconnector@samlconnector');
+		dol_include_once('/samlconnector/class/csamlconnectoridptype.class.php');
+		$dictType = new CSamlConnectorIdpType($this->db);
+		$dictType->fetch($this->fk_idp_type);
+
+		$out = '<a class="samlConnectorLoginButton" href="">';
+		$out .= $dictType->getNomUrl(2).$langs->trans('ConnectTo', $this->label);
+		$out .= '</a>';
+
+
+		return $out;
 	}
 }
 

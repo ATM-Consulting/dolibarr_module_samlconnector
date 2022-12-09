@@ -220,19 +220,45 @@ class ActionsSamlConnector {
      * @param array $parameters
      * @throws \OneLogin\Saml2\Error
      */
-    public function getLoginPageOptions($parameters) {
-        global $langs;
+	public function getLoginPageOptions($parameters) {
+		global $langs, $conf;
 
-        $url = dol_buildpath('/samlconnector', 1).'/login.php';
-        $this->results = ['table' => '<p><a href="'.$url.'">'.$langs->trans('SamlConnectorConnectBySaml').'</a></p>'];
+		if(! empty($conf->global->SAMLCONNECTOR_IDP_DISPLAY_BUTTON)) {
+			dol_include_once('samlconnector/class/samlconnectoridp.class.php');
+			$idp = new SamlConnectorIDP($this->db);
+			$idp->ismultientitymanaged = 0;
+			$TIdps = $idp->fetchAll();
+			if(!empty($TIdps)) {
+				$this->resprints = '<div class="samlConnectorLoginButtonBlock">';
+				foreach($TIdps as $idp) {
+					$moreclass = '';
+					if($conf->entity != $idp->entity) $moreclass .='hidden';
+					$this->resprints .= '<div class="samlConnectorLoginButtonElement '.$moreclass.'" data-entity="'.$idp->entity.'">';
+					$this->resprints .= $idp->getLoginButton();
+					$this->resprints .= '</div>';
+				}
+				$this->resprints .= '</div>
+				<script type="text/javascript">
+				$(document).ready(function(){
+					$(".samlConnectorLoginButtonBlock").appendTo("#login-submit-wrapper");
+                    $("#entity").on("change", function (){
+                        let entity = $(this).val();
+                        $(\'div[data-entity="\'+entity+\'"]\').removeClass("hidden");
+                        $(\'div[data-entity][data-entity!="\'+entity+\'"]\').addClass("hidden");
+                    })
+				});
+				</script>';
+			}
+		}
+		else {
+			//Force login
+			include dirname(__FILE__).'/../lib/autoload.php';
+			$login = get_saml();
 
-        //Force login
-//        include dirname(__FILE__).'/../lib/autoload.php';
-//        $login = get_saml();
-//
-//        $newpath = DOL_MAIN_URL_ROOT.'/index.php?mainmenu=home&leftmenu=home';
-//        $login->login($newpath);
-    }
+			$newpath = DOL_MAIN_URL_ROOT.'/index.php?mainmenu=home&leftmenu=home';
+			$login->login($newpath);
+		}
+	}
 
     /**
      * @param array $parameters
@@ -258,4 +284,10 @@ class ActionsSamlConnector {
         $login = get_saml();
         $login->logout($url);
     }
+
+	public function selectForFormsListWhere($parameters, &$object, &$action, $hookmanager) {
+		if($parameters['currentcontext'] == 'samlconnectorsetup') {
+			$this->resprints = ' WHERE t.active = 1';
+		}
+	}
 }

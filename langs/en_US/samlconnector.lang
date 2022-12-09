@@ -58,3 +58,4 @@ MissingIDPSource=Source du metadata de l'IDP manquant
 MissingIDPFilePathOrUrl=Chemin du fichier ou URL de l'IDP manquant
 IDPDisabled=IDP Désactivé
 IDPEnabled=IDP Activé
+ConnectTo=Connexion via %s

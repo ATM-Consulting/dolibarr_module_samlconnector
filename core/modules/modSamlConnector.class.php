@@ -104,7 +104,8 @@ class modSamlConnector extends DolibarrModules {
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [
                 'mainloginpage',
-                'logout'
+                'logout',
+				'samlconnectorsetup'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 1
@@ -112,7 +113,7 @@ class modSamlConnector extends DolibarrModules {
 
         // Data directories to create when module is enabled.
         // Example: this->dirs = array("/samlconnector/temp","/samlconnector/subdir");
-        $this->dirs = ['/samlconnector/idp'];
+        $this->dirs = ['/medias/samlconnector/idp'];
 
         // Config pages. Put here list of php page, stored into samlconnector/admin directory, to use to setup module.
         $this->config_page_url = ['setup.php@samlconnector'];
@@ -349,6 +350,7 @@ class modSamlConnector extends DolibarrModules {
      * @return int 1 if OK, 0 if KO
      */
     public function init($options = ''): int {
+		global $conf;
         $result = $this->_load_tables('/samlconnector/sql/');
         if($result < 0) return -1;  // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 
@@ -362,12 +364,13 @@ class modSamlConnector extends DolibarrModules {
         //$result5=$extrafields->addExtraField('samlconnector_myattr5', "New Attr 5 label", 'text',    1, 10, 'user',         0, 0, '', '', 1, '', 0, 0, '', '', 'samlconnector@samlconnector', '$conf->samlconnector->enabled');
 
         $sql = [];
-		if(!is_dir(DOL_DATA_ROOT.'/samlconnector/idp')) {
+
+		if(! is_dir(DOL_DATA_ROOT.'/medias/samlconnector/idp')) {
 			$this->create_dirs();
 			$sourcePathDir = __DIR__.'/../../img/idp';
 			$sourceDir = opendir($sourcePathDir);
-			while( $file = readdir($sourceDir) ) {
-				if (( $file != '.' ) && ( $file != '..' )) copy($sourcePathDir . '/' . $file, DOL_DATA_ROOT . '/samlconnector/idp/' . $file);
+			while($file = readdir($sourceDir)) {
+				if(($file != '.') && ($file != '..')) copy($sourcePathDir.'/'.$file, DOL_DATA_ROOT.'/medias/samlconnector/idp/'.$file);
 			}
 		}
 
