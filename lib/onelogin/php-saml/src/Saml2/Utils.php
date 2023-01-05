@@ -245,7 +245,7 @@ class Utils
                 if ($heads) {
                     $key = "-----BEGIN RSA PRIVATE KEY-----\n".chunk_split($key, 64, "\n")."-----END RSA PRIVATE KEY-----\n";
                 }
-            }else if (strpos($key, '-----BEGIN ENCRYPTED PRIVATE KEY-----') !== false) {
+            } else if (strpos($key, '-----BEGIN ENCRYPTED PRIVATE KEY-----') !== false) {
                 $key = Utils::getStringBetween($key, '-----BEGIN ENCRYPTED PRIVATE KEY-----', '-----END ENCRYPTED PRIVATE KEY-----');
                 $key = str_replace(' ', '', $key);
 
