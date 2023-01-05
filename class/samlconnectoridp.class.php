@@ -1128,7 +1128,7 @@ class SamlConnectorIDP extends CommonObject
 		$dictType = new CSamlConnectorIdpType($this->db);
 		$dictType->fetch($this->fk_idp_type);
 
-		$out = '<a class="samlConnectorLoginButton" href="">';
+		$out = '<a class="samlConnectorLoginButton" href="'.dol_buildpath('/samlconnector/login.php?fk_idp='.$this->id,1).'">';
 		$out .= $dictType->getNomUrl(2).$langs->trans('ConnectTo', $this->label);
 		$out .= '</a>';
 

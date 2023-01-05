@@ -5,9 +5,10 @@ use OneLogin\Saml2\Constants;
 use OneLogin\Saml2\Auth;
 
 /**
+ * @param int $fk_idp
  * @return array
  */
-function saml_settings(): array {
+function saml_settings(int $fk_idp): array {
     global $conf;
     $saml_url_root = dol_buildpath('/samlconnector', 2);
 
@@ -277,9 +278,25 @@ function saml_settings(): array {
     ];
 
     $settings = array_merge($settings, $advancedSettings);
+	$xmlMetadataSource = $xmlMetadataFilePath = $xmlMetadataUrl = '';
+	if(!empty($fk_idp)) {
+		global $db;
+		dol_include_once('samlconnector/class/samlconnectoridp.class.php');
+		$idp = new SamlConnectorIDP($db);
+		$res = $idp->fetch($fk_idp);
+		if($res > 0) {
+			$xmlMetadataSource = $idp->metadata_source;
+			$xmlMetadataFilePath = $idp->metadata_xml_path;
+			$xmlMetadataUrl = $idp->metadata_url;
+		}
+	} else {
+		$xmlMetadataSource = $conf->global->SAMLCONNECTOR_IDP_METADATA_SOURCE;
+		$xmlMetadataFilePath = $conf->global->SAMLCONNECTOR_IDP_METADATA_XML_PATH;
+		$xmlMetadataUrl = $conf->global->SAMLCONNECTOR_IDP_METADATA_URL;
+	}
 
-    if($conf->global->SAMLCONNECTOR_IDP_METADATA_SOURCE == 'localFile') $idp_metadata = IdPMetadataParser::parseFileXML($conf->global->SAMLCONNECTOR_IDP_METADATA_XML_PATH);
-    else $idp_metadata = IdPMetadataParser::parseRemoteXML($conf->global->SAMLCONNECTOR_IDP_METADATA_URL); // Url
+    if($xmlMetadataSource == 'localFile') $idp_metadata = IdPMetadataParser::parseFileXML($xmlMetadataFilePath);
+    else $idp_metadata = IdPMetadataParser::parseRemoteXML($xmlMetadataUrl); // Url
 
     $settings_compiled = IdPMetadataParser::injectIntoSettings($settings, $idp_metadata);
     $settings_compiled['sp'] = $settings['sp'];
@@ -289,9 +306,10 @@ function saml_settings(): array {
 /**
  * Get SAML Auth object
  *
+ * @param int $fk_idp
  * @return Auth
  * @throws \OneLogin\Saml2\Error
  */
-function get_saml(): Auth {
-    return new Auth(saml_settings());
+function get_saml(int $fk_idp): Auth {
+    return new Auth(saml_settings($fk_idp));
 }
