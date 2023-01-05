@@ -53,7 +53,8 @@ $idp = new SamlConnectorIDP($db);
 // Savable conf for SP
 $parameterSP = [
 	'SAMLCONNECTOR_SP_CERT_PATH' => ['type' => 'string', 'enabled' => 1],
-	'SAMLCONNECTOR_SP_PRIV_KEY_PATH' => ['type' => 'string', 'enabled' => 1]
+	'SAMLCONNECTOR_SP_PRIV_KEY_PATH' => ['type' => 'string', 'enabled' => 1],
+	'SAMLCONNECTOR_SP_PRIV_KEY_PASSPHRASE' => ['type' => 'password', 'enabled' => 1]
 ];
 
 // Savable conf for IDP
@@ -356,6 +357,9 @@ else {
 							print $langs->trans('NorProspectNorCustomer');
 						}
 					}
+                    elseif ($val['type'] == 'password') {
+                        print preg_replace('/./i', '*', $conf->global->{$constname});
+                    }
 					else {
 						print $conf->global->{$constname};
 					}

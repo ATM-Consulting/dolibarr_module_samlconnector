@@ -124,6 +124,10 @@ function printConfInput($constname, $val) {
 
                     print Form::selectarray($constname, $data, $conf->global->$constname, 1, 0, 0, '', 1);
                 }
+				elseif ($val['type'] == 'password') {
+					// If prefix is 'search_', field is used as a filter, we use a common text field.
+					print '<input type="password" class="flat " name="'.$constname.'" id="'.$constname.'" value="'.$conf->global->{$constname}.'">';
+				}
                 else {
                     print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth400' : $val['css']).'" value="'.$conf->global->{$constname}.'">';
                 }
