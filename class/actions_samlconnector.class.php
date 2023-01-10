@@ -223,21 +223,23 @@ class ActionsSamlConnector {
 	public function getLoginPageOptions($parameters) {
 		global $langs, $conf;
 
-		if(! empty($conf->global->SAMLCONNECTOR_IDP_DISPLAY_BUTTON)) {
-			dol_include_once('samlconnector/class/samlconnectoridp.class.php');
-			$idp = new SamlConnectorIDP($this->db);
-			$idp->ismultientitymanaged = 0;
-			$TIdps = $idp->fetchAll();
-			if(!empty($TIdps)) {
-				$this->resprints = '<div class="samlConnectorLoginButtonBlock">';
-				foreach($TIdps as $idp) {
-					$moreclass = '';
-					if($conf->entity != $idp->entity) $moreclass .='hidden';
-					$this->resprints .= '<div class="samlConnectorLoginButtonElement '.$moreclass.'" data-entity="'.$idp->entity.'">';
-					$this->resprints .= $idp->getLoginButton();
-					$this->resprints .= '</div>';
-				}
-				$this->resprints .= '</div>
+		if (!empty($conf->global->SAMLCONNECTOR_IDP_DISPLAY_BUTTON)) {
+			if (!empty($conf->global->SAMLCONNECTOR_MANAGE_MULTIPLE_IDP)) {
+				dol_include_once('samlconnector/class/samlconnectoridp.class.php');
+				$idp = new SamlConnectorIDP($this->db);
+				$idp->ismultientitymanaged = 0;
+				$TIdps = $idp->fetchAll();
+				if (!empty($TIdps)) {
+					$this->resprints = '<div class="samlConnectorLoginButtonBlock">';
+					foreach ($TIdps as $idp) {
+						$moreclass = '';
+						if ($idp->status == SamlConnectorIDP::STATUS_INACTIVE) continue;
+						if (!empty($conf->multicompany->enabled) && $conf->entity != $idp->entity) $moreclass .= 'hidden';
+						$this->resprints .= '<div class="samlConnectorLoginButtonElement ' . $moreclass . '" data-entity="' . $idp->entity . '">';
+						$this->resprints .= $idp->getLoginButton();
+						$this->resprints .= '</div>';
+					}
+					$this->resprints .= '</div>
 				<script type="text/javascript">
 				$(document).ready(function(){
 					$(".samlConnectorLoginButtonBlock").appendTo("#login-submit-wrapper");
@@ -248,6 +250,10 @@ class ActionsSamlConnector {
                     })
 				});
 				</script>';
+				}
+			} else {
+				$url = dol_buildpath('/samlconnector', 1).'/login.php';
+				$this->resprints = '<p><a href="'.$url.'">'.$langs->trans('SamlConnectorConnectBySaml').'</a></p>';
 			}
 		}
 		else {
@@ -274,14 +280,14 @@ class ActionsSamlConnector {
         $url = DOL_URL_ROOT.'/index.php';        // By default, go to login page
         if($urlfrom) $url = DOL_URL_ROOT.$urlfrom;
         if(! empty($conf->global->MAIN_LOGOUT_GOTO_URL)) $url = $conf->global->MAIN_LOGOUT_GOTO_URL;
+		$fk_idp = intval($_SESSION['dol_samlconnector_fk_idp']);
 
         foreach(array_keys($_SESSION) as $key) {
             unset($_SESSION[$key]);
         }
 
         include dirname(__FILE__).'/../lib/autoload.php';
-
-        $login = get_saml();
+        $login = get_saml($fk_idp);
         $login->logout($url);
     }
 

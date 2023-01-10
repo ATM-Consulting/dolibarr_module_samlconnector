@@ -67,6 +67,8 @@ class SamlConnectorIDP extends CommonObject
 	const STATUS_INACTIVE = 0;
 	const STATUS_ACTIVE = 1;
 
+	const TSourceFile = array('0'=>'url', '1'=>'localFile');
+
 
 	/**
 	 *  'type' field format ('integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter]]', 'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter]]]', 'varchar(x)', 'double(24,8)', 'real', 'price', 'text', 'text:none', 'html', 'date', 'datetime', 'timestamp', 'duration', 'mail', 'phone', 'url', 'password')
@@ -1052,10 +1054,11 @@ class SamlConnectorIDP extends CommonObject
 	 * @return void
 	 */
 	public function printSetupAddForm() {
-		global $langs, $form;
+		global $langs, $form, $conf;
 		print '<form action="'.$_SERVER['PHP_SELF'].'" method="POST">';
 		print '<input type="hidden" name="token" value="'.newToken().'">';
 		print '<input type="hidden" name="action" value="addIDP">';
+		print '<input type="hidden" name="entity" value="'.$conf->entity.'">';
 		print '<div class="div-table-responsive-no-min">';
 		print load_fiche_titre($langs->trans('AddIDP'), '', '');
 		print '<table class="noborder centpercent">';
@@ -1127,7 +1130,6 @@ class SamlConnectorIDP extends CommonObject
 		dol_include_once('/samlconnector/class/csamlconnectoridptype.class.php');
 		$dictType = new CSamlConnectorIdpType($this->db);
 		$dictType->fetch($this->fk_idp_type);
-
 		$out = '<a class="samlConnectorLoginButton" href="'.dol_buildpath('/samlconnector/login.php?fk_idp='.$this->id,1).'">';
 		$out .= $dictType->getNomUrl(2).$langs->trans('ConnectTo', $this->label);
 		$out .= '</a>';

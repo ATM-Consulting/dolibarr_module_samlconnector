@@ -8,13 +8,33 @@ use OneLogin\Saml2\Auth;
  * @param int $fk_idp
  * @return array
  */
-function saml_settings(int $fk_idp): array {
+function saml_settings(int $fk_idp = 0): array {
     global $conf;
     $saml_url_root = dol_buildpath('/samlconnector', 2);
 
     $certContent = $privKeyContent = '';
     if(file_exists($conf->global->SAMLCONNECTOR_SP_CERT_PATH)) $certContent = file_get_contents($conf->global->SAMLCONNECTOR_SP_CERT_PATH);
     if(file_exists($conf->global->SAMLCONNECTOR_SP_PRIV_KEY_PATH)) $privKeyContent = file_get_contents($conf->global->SAMLCONNECTOR_SP_PRIV_KEY_PATH);
+
+	$xmlMetadataSource = $xmlMetadataFilePath = $xmlMetadataUrl = '';
+	$entity = 0;
+	if(!empty($fk_idp)) {
+		global $db;
+		dol_include_once('samlconnector/class/samlconnectoridp.class.php');
+		$idp = new SamlConnectorIDP($db);
+		$res = $idp->fetch($fk_idp);
+		if($res > 0) {
+			$xmlMetadataSource = SamlConnectorIDP::TSourceFile[$idp->metadata_source];
+			$xmlMetadataFilePath = $idp->metadata_xml_path;
+			$xmlMetadataUrl = $idp->metadata_url;
+			$entity = $idp->entity;
+		}
+	} else {
+		$xmlMetadataSource = $conf->global->SAMLCONNECTOR_IDP_METADATA_SOURCE;
+		$xmlMetadataFilePath = $conf->global->SAMLCONNECTOR_IDP_METADATA_XML_PATH;
+		$xmlMetadataUrl = $conf->global->SAMLCONNECTOR_IDP_METADATA_URL;
+		$entity = $conf->entity;
+	}
 
     $settings = [
         // If 'strict' is True, then the PHP Toolkit will reject unsigned
@@ -40,7 +60,7 @@ function saml_settings(int $fk_idp): array {
             // returned to the requester, in this case our SP.
             'assertionConsumerService' => [
                 // URL Location where the <Response> from the IdP will be returned
-                'url' => $saml_url_root.'/acs.php',
+                'url' => $saml_url_root.'/acs.php?entity='.$entity.'&fk_idp='.$fk_idp,
                 // SAML protocol binding to be used when returning the <Response>
                 // message. OneLogin Toolkit supports this endpoint for the
                 // HTTP-POST binding only.
@@ -73,7 +93,7 @@ function saml_settings(int $fk_idp): array {
             // returned to the requester, in this case our SP.
             'singleLogoutService' => [
                 // URL Location where the <Response> from the IdP will be returned
-                'url' => $saml_url_root.'/sls.php',
+                'url' => $saml_url_root.'/sls.php?entity='.$entity.'&fk_idp='.$fk_idp,
                 // SAML protocol binding to be used when returning the <Response>
                 // message. OneLogin Toolkit supports the HTTP-Redirect binding
                 // only for this endpoint.
@@ -278,22 +298,6 @@ function saml_settings(int $fk_idp): array {
     ];
 
     $settings = array_merge($settings, $advancedSettings);
-	$xmlMetadataSource = $xmlMetadataFilePath = $xmlMetadataUrl = '';
-	if(!empty($fk_idp)) {
-		global $db;
-		dol_include_once('samlconnector/class/samlconnectoridp.class.php');
-		$idp = new SamlConnectorIDP($db);
-		$res = $idp->fetch($fk_idp);
-		if($res > 0) {
-			$xmlMetadataSource = $idp->metadata_source;
-			$xmlMetadataFilePath = $idp->metadata_xml_path;
-			$xmlMetadataUrl = $idp->metadata_url;
-		}
-	} else {
-		$xmlMetadataSource = $conf->global->SAMLCONNECTOR_IDP_METADATA_SOURCE;
-		$xmlMetadataFilePath = $conf->global->SAMLCONNECTOR_IDP_METADATA_XML_PATH;
-		$xmlMetadataUrl = $conf->global->SAMLCONNECTOR_IDP_METADATA_URL;
-	}
 
     if($xmlMetadataSource == 'localFile') $idp_metadata = IdPMetadataParser::parseFileXML($xmlMetadataFilePath);
     else $idp_metadata = IdPMetadataParser::parseRemoteXML($xmlMetadataUrl); // Url
@@ -310,6 +314,6 @@ function saml_settings(int $fk_idp): array {
  * @return Auth
  * @throws \OneLogin\Saml2\Error
  */
-function get_saml(int $fk_idp): Auth {
+function get_saml(int $fk_idp = 0): Auth {
     return new Auth(saml_settings($fk_idp));
 }

@@ -522,7 +522,7 @@ class Auth
      * @param bool        $setNameIdPolicy When true the AuthNRequest will set a nameIdPolicy element
      *
      * @return string|null If $stay is True, it return a string with the SLO URL + LogoutRequest + parameters
-     * 
+     *
      * @throws Error
      */
     public function login($returnTo = null, array $parameters = array(), $forceAuthn = false, $isPassive = false, $stay = false, $setNameIdPolicy = true)
