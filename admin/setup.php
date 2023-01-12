@@ -210,7 +210,7 @@ else if(floatval(DOL_VERSION) < 12.0 && $action === 'update') {
 	foreach($arrayofparameters as $key => $val) {
 		// Modify constant only if key was posted (avoid resetting key to the null value)
 		if(GETPOSTISSET($key)) {
-			$result = dolibarr_set_const($db, $key, GETPOST($key, 'alpha'), 'chaine', 0, '', $conf->entity);
+			$result = dolibarr_set_const($db, $key, GETPOST($key, 'alpha'), 'chaine', 0, '', 0);
 			if($result < 0) {
 				$ok = false;
 				break;
@@ -400,7 +400,7 @@ else {
 // Identity Provider (IDP) setup part
 print load_fiche_titre($langs->trans('SamlConnectorAdminTitleTabIDP'), '', '');
 
-if($action == 'editIDP') {
+if($action == 'editIDP' && $conf->entity == 1) {
 	if($useFormSetup && (float) DOL_VERSION >= 15.0) {
 		$formSetup = new FormSetup($db);
 		print $formSetup->generateOutput(true);
@@ -463,7 +463,7 @@ else {
 						print  $conf->global->{$constname};
 					}
 					else if($val['type'] == 'yesno') {
-						print ajax_constantonoff($constname);
+						print ajax_constantonoff($constname, array(), 0);
 					}
 					else if(preg_match('/emailtemplate:/', $val['type'])) {
 						include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
@@ -517,7 +517,7 @@ else {
 						}
 					}
 					else if($val['type'] == 'array') {
-						print $langs->trans($conf->global->{$constname});
+						if(!empty($conf->global->{$constname})) print $langs->trans($conf->global->{$constname});
 					}
 					else {
 						print $conf->global->{$constname};
@@ -530,7 +530,7 @@ else {
 		}
 	}
 
-	if($setupnotempty) {
+	if($setupnotempty && $conf->entity == 1) {
 		print '<div class="tabsAction">';
 		print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editIDP&token='.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">'.$langs->trans('Modify').'</a>';
 		print '</div>';
@@ -618,6 +618,13 @@ print dol_get_fiche_end();
             });
             showHideConfLine(selectorTriggered, targetSelector, false, false, hideIfActive);
         }
+
+        <?php if($conf->entity != 1) { //Pour disable les ajax on off?>
+            $('#set_SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').css('pointer-events','none').addClass('opacitymedium');
+            $('#del_SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').css('pointer-events','none').addClass('opacitymedium');
+            $('#del_SAMLCONNECTOR_IDP_DISPLAY_BUTTON').css('pointer-events','none').addClass('opacitymedium');
+            $('#set_SAMLCONNECTOR_IDP_DISPLAY_BUTTON').css('pointer-events','none').addClass('opacitymedium');
+        <?php } ?>
     </script>
 <?php
 

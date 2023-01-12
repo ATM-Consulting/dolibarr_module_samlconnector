@@ -28,7 +28,8 @@ class modSamlConnector extends DolibarrModules {
      */
     public function __construct($db) {
         global $conf, $langs;
-		$langs->load($this->name.'@'.$this->name);
+		$langs->load('samlconnector@samlconnector');
+
         $this->db = $db;
 
         // Id for module (must be unique).
@@ -71,7 +72,7 @@ class modSamlConnector extends DolibarrModules {
         // If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
         // If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
         // To use a supported fa-xxx css style of font awesome, use this->picto='xxx'
-        $this->picto = 'generic';
+        $this->picto = 'samlconnector@samlconnector';
 
         // Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
         $this->module_parts = [
@@ -187,7 +188,6 @@ class modSamlConnector extends DolibarrModules {
         // 'stock'            to add a tab in stock view
         // 'thirdparty'       to add a tab in third party view
         // 'user'             to add a tab in user view
-
         // Dictionaries
        $this->dictionaries		= array('langs'				=> $this->name.'@'.$this->name,
 											'tabname'			=> array(	MAIN_DB_PREFIX.'c_samlconnector_idp_type'
