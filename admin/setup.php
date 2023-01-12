@@ -49,6 +49,8 @@ $fk_idp = GETPOST('fk_idp', 'int');
 
 $form = new Form($db);
 $idp = new SamlConnectorIDP($db);
+$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
+
 
 // Savable conf for SP
 $parameterSP = [
@@ -120,7 +122,7 @@ if($action == 'disableIDP' || $action == 'enableIDP') {
 
 if($action == 'addIDP') {
 	$error = 0;
-	if(! empty($idp->fields)) {
+	if(is_array($idp->fields) && ! empty($idp->fields)) {
 		foreach($idp->fields as $key => $field) {
 			if(GETPOSTISSET($key)) $idp->{$key} = GETPOST($key, 'none');
 		}
@@ -170,7 +172,7 @@ if($action == 'confirm_deleteIDP') {
 }
 
 //Les paramètres SP sont sur toutes les entités donc on enregistre la conf en entité 0
-if($action == 'update' && ! empty($parameterSP)) {
+if($action == 'update' && is_array($parameterSP) && ! empty($parameterSP)) {
 	$spIsUpdate = false;
 	foreach($parameterSP as $key => $psp) {
 		if(GETPOSTISSET($key)) {
@@ -210,13 +212,15 @@ else if(floatval(DOL_VERSION) < 12.0 && $action === 'update') {
 	$db->begin();
 
 	$ok = true;
-	foreach($arrayofparameters as $key => $val) {
-		// Modify constant only if key was posted (avoid resetting key to the null value)
-		if(GETPOSTISSET($key)) {
-			$result = dolibarr_set_const($db, $key, GETPOST($key, 'alpha'), 'chaine', 0, '', 0);
-			if($result < 0) {
-				$ok = false;
-				break;
+	if (is_array($arrayofparameters) && !empty($arrayofparameters)) {
+		foreach ($arrayofparameters as $key => $val) {
+			// Modify constant only if key was posted (avoid resetting key to the null value)
+			if (GETPOSTISSET($key)) {
+				$result = dolibarr_set_const($db, $key, GETPOST($key, 'alpha'), 'chaine', 0, '', 0);
+				if ($result < 0) {
+					$ok = false;
+					break;
+				}
 			}
 		}
 	}
@@ -262,7 +266,7 @@ if($action == 'editSP' && $conf->entity == 1) {
 	}
 	else {
 		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-		print '<input type="hidden" name="token" value="'.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">';
+		print '<input type="hidden" name="token" value="'.$newToken.'">';
 		print '<input type="hidden" name="action" value="update">';
 
 		print '<table class="noborder centpercent">';
@@ -298,7 +302,7 @@ else {
 		}
 	}
 	else {
-		if(! empty($parameterSP)) {
+		if(is_array($parameterSP) && ! empty($parameterSP)) {
 			print '<table class="noborder centpercent">';
 			print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
 
@@ -317,7 +321,7 @@ else {
 						print  $conf->global->{$constname};
 					}
 					else if($val['type'] == 'yesno') {
-						print ajax_constantonoff($constname);
+						print ajax_constantonoff($constname, array(), 0);
 					}
 					else if(preg_match('/emailtemplate:/', $val['type'])) {
 						include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
@@ -340,8 +344,10 @@ else {
 						else if($result > 0) {
 							$ways = $c->print_all_ways(' &gt;&gt; ', 'none', 0, 1); // $ways[0] = "ccc2 >> ccc2a >> ccc2a1" with html formated text
 							$toprint = [];
-							foreach($ways as $way) {
-								$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories"'.($c->color ? ' style="background: #'.$c->color.';"' : ' style="background: #bbb"').'>'.$way.'</li>';
+							if(is_array($ways)) {
+								foreach ($ways as $way) {
+									$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories"' . ($c->color ? ' style="background: #' . $c->color . ';"' : ' style="background: #bbb"') . '>' . $way . '</li>';
+								}
 							}
 							print '<div class="select2-container-multi-dolibarr" style="width: 90%;"><ul class="select2-choices-dolibarr">'.implode(' ', $toprint).'</ul></div>';
 						}
@@ -395,7 +401,7 @@ else {
 
 	if($setupnotempty && $conf->entity == 1) {
 		print '<div class="tabsAction">';
-		print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editSP&token='.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">'.$langs->trans('Modify').'</a>';
+		print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editSP&token='.$newToken.'">'.$langs->trans('Modify').'</a>';
 		print '</div>';
 	}
 }
@@ -410,7 +416,7 @@ if($action == 'editIDP' && $conf->entity == 1) {
 	}
 	else {
 		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-		print '<input type="hidden" name="token" value="'.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">';
+		print '<input type="hidden" name="token" value="'.$newToken.'">';
 		print '<input type="hidden" name="action" value="update">';
 
 		print '<table class="noborder centpercent">';
@@ -535,7 +541,7 @@ else {
 
 	if($setupnotempty && $conf->entity == 1) {
 		print '<div class="tabsAction">';
-		print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editIDP&token='.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">'.$langs->trans('Modify').'</a>';
+		print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editIDP&token='.$newToken.'">'.$langs->trans('Modify').'</a>';
 		print '</div>';
 	}
 }
@@ -546,7 +552,7 @@ if(! in_array($action, array('editIDP', 'editSP'))) {
 	$idp->printSetupAddForm();
 
 	$TIdps = $idp->fetchAll();
-	if(! empty($TIdps)) {
+	if(is_array($TIdps) && ! empty($TIdps)) {
 		foreach($TIdps as $idp) {
 			$idp->printSetupBloc();
 		}

@@ -229,7 +229,7 @@ class ActionsSamlConnector {
 				$idp = new SamlConnectorIDP($this->db);
 				$idp->ismultientitymanaged = 0;
 				$TIdps = $idp->fetchAll();
-				if (!empty($TIdps)) {
+				if (is_array($TIdps) && !empty($TIdps)) {
 					$this->resprints = '<div class="samlConnectorLoginButtonBlock">';
 					foreach ($TIdps as $idp) {
 						$moreclass = '';

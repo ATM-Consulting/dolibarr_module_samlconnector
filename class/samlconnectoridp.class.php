@@ -192,18 +192,22 @@ class SamlConnectorIDP extends CommonObject
 		}*/
 
 		// Unset fields that are disabled
-		foreach ($this->fields as $key => $val) {
-			if (isset($val['enabled']) && empty($val['enabled'])) {
-				unset($this->fields[$key]);
+		if(is_array($this->fields)) {
+			foreach ($this->fields as $key => $val) {
+				if (isset($val['enabled']) && empty($val['enabled'])) {
+					unset($this->fields[$key]);
+				}
 			}
 		}
 
 		// Translate some data of arrayofkeyval
 		if (is_object($langs)) {
-			foreach ($this->fields as $key => $val) {
-				if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
-					foreach ($val['arrayofkeyval'] as $key2 => $val2) {
-						$this->fields[$key]['arrayofkeyval'][$key2] = $langs->trans($val2);
+			if(is_array($this->fields)) {
+				foreach ($this->fields as $key => $val) {
+					if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+						foreach ($val['arrayofkeyval'] as $key2 => $val2) {
+							$this->fields[$key]['arrayofkeyval'][$key2] = $langs->trans($val2);
+						}
 					}
 				}
 			}
@@ -385,7 +389,7 @@ class SamlConnectorIDP extends CommonObject
 		}
 		// Manage filter
 		$sqlwhere = array();
-		if (count($filter) > 0) {
+		if (is_array($filter) && count($filter) > 0) {
 			foreach ($filter as $key => $value) {
 				if ($key == 't.rowid') {
 					$sqlwhere[] = $key.'='.$value;
@@ -1055,8 +1059,10 @@ class SamlConnectorIDP extends CommonObject
 	 */
 	public function printSetupAddForm() {
 		global $langs, $form, $conf;
+		$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
+
 		print '<form action="'.$_SERVER['PHP_SELF'].'" method="POST">';
-		print '<input type="hidden" name="token" value="'.newToken().'">';
+		print '<input type="hidden" name="token" value="'.$newToken.'">';
 		print '<input type="hidden" name="action" value="addIDP">';
 		print '<input type="hidden" name="entity" value="'.$conf->entity.'">';
 		print '<div class="div-table-responsive-no-min">';
@@ -1064,23 +1070,27 @@ class SamlConnectorIDP extends CommonObject
 		print '<table class="noborder centpercent">';
 		print '<tr class="liste_titre">';
 
-		foreach($this->fields as $field) {
-			if(empty($field['help'])) $field['help'] = '';
-			if($field['visible'] > 0) {
-				print '<td>';
-				print $form->textwithtooltip($langs->trans($field['label']), $langs->trans($field['help']));
-				print '</td>';
+		if(is_array($this->fields)) {
+			foreach ($this->fields as $field) {
+				if (empty($field['help'])) $field['help'] = '';
+				if ($field['visible'] > 0) {
+					print '<td>';
+					print $form->textwithtooltip($langs->trans($field['label']), $langs->trans($field['help']));
+					print '</td>';
+				}
 			}
 		}
 		print '<td></td>';
 		print '</tr>';
 		print '<!-- line to add new entry -->';
 		print '<tr class="oddeven nodrag nodrop nohover">';
-		foreach($this->fields as $key => $field) {
-			if($field['visible'] > 0) {
-				print '<td>';
-				print $this->showInputField($field, $key, '');
-				print '</td>';
+		if(is_array($this->fields)) {
+			foreach ($this->fields as $key => $field) {
+				if ($field['visible'] > 0) {
+					print '<td>';
+					print $this->showInputField($field, $key, '');
+					print '</td>';
+				}
 			}
 		}
 		print '<td><input type="submit" class="button" name="actionadd" value="'.$langs->trans('Add').'"/></td>';
@@ -1099,23 +1109,24 @@ class SamlConnectorIDP extends CommonObject
 		print load_fiche_titre($langs->trans('IDP').' : '.$this->label, '', '');
 		print '<table class="noborder centpercent">';
 		print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
+		if(is_array($this->fields)) {
+			foreach ($this->fields as $key => $field) {
+				if ($field['visible'] > 0) {
+					if (empty($field['help'])) $field['help'] = '';
+					print '<tr class="oddeven">';
+					print '<td>';
+					print $form->textwithtooltip($langs->trans($field['label']), $langs->trans($field['help']));
+					print '</td>';
+					print '<td>';
+					print $this->showOutputField($field, $key, $this->{$key});
+					if ($key == 'status') {
+						if ($this->{$key} > 0) print '&nbsp;&nbsp;&nbsp;(<a href="' . $_SERVER['PHP_SELF'] . '?action=disableIDP&fk_idp=' . $this->id . '"/>' . $langs->trans('Disable') . '</a>)';
+						else  print '&nbsp;&nbsp;&nbsp;(<a href="' . $_SERVER['PHP_SELF'] . '?action=enableIDP&fk_idp=' . $this->id . '"/>' . $langs->trans('Enable') . '</a>)';
+					}
 
-		foreach($this->fields as $key => $field) {
-			if($field['visible'] > 0) {
-                if(empty($field['help'])) $field['help'] = '';
-				print '<tr class="oddeven">';
-				print '<td>';
-				print $form->textwithtooltip($langs->trans($field['label']), $langs->trans($field['help']));
-				print '</td>';
-				print '<td>';
-				print $this->showOutputField($field, $key, $this->{$key});
-				if($key == 'status') {
-					if($this->{$key} > 0) print '&nbsp;&nbsp;&nbsp;(<a href="'.$_SERVER['PHP_SELF'].'?action=disableIDP&fk_idp='.$this->id.'"/>'.$langs->trans('Disable').'</a>)';
-					else  print '&nbsp;&nbsp;&nbsp;(<a href="'.$_SERVER['PHP_SELF'].'?action=enableIDP&fk_idp='.$this->id.'"/>'.$langs->trans('Enable').'</a>)';
+					print '</td>';
+					print '</tr>';
 				}
-
-				print '</td>';
-				print '</tr>';
 			}
 		}
         print '</table>';
