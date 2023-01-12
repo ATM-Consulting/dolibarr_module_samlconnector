@@ -201,7 +201,10 @@ if($action == 'update' && ! empty($parameterSP)) {
 }
 
 if(floatval(DOL_VERSION) >= 12.0) {
+	$oldEntity = $conf->entity;
+	$conf->entity = 0;
 	include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
+	$conf->entity = $oldEntity;
 }
 else if(floatval(DOL_VERSION) < 12.0 && $action === 'update') {
 	$db->begin();
