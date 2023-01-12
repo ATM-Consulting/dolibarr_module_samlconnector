@@ -27,7 +27,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once __DIR__.'/lib/autoload.php';
 
 $fk_idp = GETPOST('fk_idp', 'int');
-
+$fk_idp = intval($fk_idp);
 $login = get_saml($fk_idp);
 
 $newpath = DOL_MAIN_URL_ROOT.'/index.php?mainmenu=home&leftmenu=home';
