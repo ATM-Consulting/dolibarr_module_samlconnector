@@ -25,8 +25,8 @@ for($i = 0 ; $i < 5 && ! $res ; $i++) $res = @include str_repeat('../', $i).$mai
 
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once __DIR__.'/lib/autoload.php';
-
-$login = get_saml();
+$fk_idp = GETPOST('fk_idp', 'int');
+$login = get_saml($fk_idp);
 
 $login->processSLO();
 

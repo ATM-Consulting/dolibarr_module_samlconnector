@@ -28,7 +28,9 @@ global $db, $conf, $langs, $hookmanager;
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once __DIR__.'/lib/autoload.php';
 
-$login = get_saml();
+$fk_idp = GETPOST('fk_idp', 'int');
+
+$login = get_saml($fk_idp);
 
 $login->processResponse();
 
@@ -45,6 +47,7 @@ if($login->isAuthenticated()) {
         $user->admin = in_array('ADMINISTRATOR', $login->getAttribute('type')) ? 1 : 0;
         $user->email = $login->getAttribute($conf->global->SAMLCONNECTOR_MAPPING_USER_EMAIL)[0];
     }
+
 
     if($res <= 0 && ! empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER)) {
         $user->login = $login->getNameId();
@@ -66,7 +69,9 @@ if($login->isAuthenticated()) {
         $_SESSION['dol_screenwidth'] = $dol_screenwidth ?? '';
         $_SESSION['dol_screenheight'] = $dol_screenheight ?? '';
         $_SESSION['dol_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
-        $_SESSION['dol_entity'] = $conf->entity;
+        $_SESSION['dol_samlconnector_fk_idp'] = $fk_idp;
+		if(GETPOSTISSET('entity')) $_SESSION['dol_entity'] = GETPOST('entity','int');
+        else $_SESSION['dol_entity'] = $conf->entity;
 
         // Store value into session (values stored only if defined)
         if(! empty($dol_hide_topmenu)) $_SESSION['dol_hide_topmenu'] = $dol_hide_topmenu;

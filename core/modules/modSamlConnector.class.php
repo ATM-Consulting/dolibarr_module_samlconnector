@@ -27,7 +27,9 @@ class modSamlConnector extends DolibarrModules {
      * @param DoliDB $db Database handler
      */
     public function __construct($db) {
-        global $conf;
+        global $conf, $langs;
+		$langs->load('samlconnector@samlconnector');
+
         $this->db = $db;
 
         // Id for module (must be unique).
@@ -59,7 +61,7 @@ class modSamlConnector extends DolibarrModules {
         $this->editor_url = 'https://www.atm-consulting.fr/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-        $this->version = '1.0.1';
+        $this->version = '2.0.0';
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
 
@@ -70,7 +72,7 @@ class modSamlConnector extends DolibarrModules {
         // If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
         // If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
         // To use a supported fa-xxx css style of font awesome, use this->picto='xxx'
-        $this->picto = 'generic';
+        $this->picto = 'samlconnector@samlconnector';
 
         // Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
         $this->module_parts = [
@@ -103,7 +105,8 @@ class modSamlConnector extends DolibarrModules {
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [
                 'mainloginpage',
-                'logout'
+                'logout',
+				'samlconnectorsetup'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 1
@@ -111,7 +114,7 @@ class modSamlConnector extends DolibarrModules {
 
         // Data directories to create when module is enabled.
         // Example: this->dirs = array("/samlconnector/temp","/samlconnector/subdir");
-        $this->dirs = ['/samlconnector/temp'];
+        $this->dirs = ['/medias/samlconnector/idp'];
 
         // Config pages. Put here list of php page, stored into samlconnector/admin directory, to use to setup module.
         $this->config_page_url = ['setup.php@samlconnector'];
@@ -185,9 +188,29 @@ class modSamlConnector extends DolibarrModules {
         // 'stock'            to add a tab in stock view
         // 'thirdparty'       to add a tab in third party view
         // 'user'             to add a tab in user view
-
         // Dictionaries
-        $this->dictionaries = [];
+       $this->dictionaries		= array('langs'				=> $this->name.'@'.$this->name,
+											'tabname'			=> array(	MAIN_DB_PREFIX.'c_samlconnector_idp_type'
+																		),
+											'tablib'			=> array(	'SamlConnectorIdpType'
+																		),
+											'tabsql'			=> array(	'SELECT rowid, code,  libelle, img_path, active FROM '.MAIN_DB_PREFIX.'c_samlconnector_idp_type'
+																		),
+											'tabsqlsort'		=> array(	'rowid ASC'
+																		),
+											'tabfield'			=> array(	'code,libelle,img_path'
+																		),
+											'tabfieldvalue'		=> array(	'code,libelle,img_path'
+																		),
+											'tabfieldinsert'	=> array(	'code,libelle,img_path'
+																		),
+											'tabrowid'			=> array(	'rowid'
+																		),
+											'tabcond'			=> array(	$conf->samlconnector->enabled
+																		),
+											'tabhelp'			=> array(	array('img_path'	=> $langs->trans('SamlConnectorImgPathHelp'))
+																		)
+											);	// Dictionaries
         /* Example:
         $this->dictionaries=array(
             'langs'=>'samlconnector@samlconnector',
@@ -231,8 +254,8 @@ class modSamlConnector extends DolibarrModules {
             //  0 => array(
             //      'label' => 'MyJob label',
             //      'jobtype' => 'method',
-            //      'class' => '/samlconnector/class/myobject.class.php',
-            //      'objectname' => 'MyObject',
+            //      'class' => '/samlconnector/class/samlconnectoridp.class.php',
+            //      'objectname' => 'SamlConnectorIDP',
             //      'method' => 'doScheduledJob',
             //      'parameters' => '',
             //      'comment' => 'Comment',
@@ -256,66 +279,66 @@ class modSamlConnector extends DolibarrModules {
 
         // Exports profiles provided by this module
 //        $r = 1;
-        /* BEGIN MODULEBUILDER EXPORT MYOBJECT */ /*
+        /* BEGIN MODULEBUILDER EXPORT SAMLCONNECTORIDP */ /*
         $langs->load("samlconnector@samlconnector");
         $this->export_code[$r]=$this->rights_class.'_'.$r;
-        $this->export_label[$r]='MyObjectLines';	// Translation key (used only if key ExportDataset_xxx_z not found)
-        $this->export_icon[$r]='myobject@samlconnector';
+        $this->export_label[$r]='SamlConnectorIDPLines';	// Translation key (used only if key ExportDataset_xxx_z not found)
+        $this->export_icon[$r]='samlconnectoridp@samlconnector';
         // Define $this->export_fields_array, $this->export_TypeFields_array and $this->export_entities_array
-        $keyforclass = 'MyObject'; $keyforclassfile='/samlconnector/class/myobject.class.php'; $keyforelement='myobject@samlconnector';
+        $keyforclass = 'SamlConnectorIDP'; $keyforclassfile='/samlconnector/class/samlconnectoridp.class.php'; $keyforelement='samlconnectoridp@samlconnector';
         include DOL_DOCUMENT_ROOT.'/core/commonfieldsinexport.inc.php';
         //$this->export_fields_array[$r]['t.fieldtoadd']='FieldToAdd'; $this->export_TypeFields_array[$r]['t.fieldtoadd']='Text';
         //unset($this->export_fields_array[$r]['t.fieldtoremove']);
-        //$keyforclass = 'MyObjectLine'; $keyforclassfile='/samlconnector/class/myobject.class.php'; $keyforelement='myobjectline@samlconnector'; $keyforalias='tl';
+        //$keyforclass = 'SamlConnectorIDPLine'; $keyforclassfile='/samlconnector/class/samlconnectoridp.class.php'; $keyforelement='samlconnectoridpline@samlconnector'; $keyforalias='tl';
         //include DOL_DOCUMENT_ROOT.'/core/commonfieldsinexport.inc.php';
-        $keyforselect='myobject'; $keyforaliasextra='extra'; $keyforelement='myobject@samlconnector';
+        $keyforselect='samlconnectoridp'; $keyforaliasextra='extra'; $keyforelement='samlconnectoridp@samlconnector';
         include DOL_DOCUMENT_ROOT.'/core/extrafieldsinexport.inc.php';
-        //$keyforselect='myobjectline'; $keyforaliasextra='extraline'; $keyforelement='myobjectline@samlconnector';
+        //$keyforselect='samlconnectoridpline'; $keyforaliasextra='extraline'; $keyforelement='samlconnectoridpline@samlconnector';
         //include DOL_DOCUMENT_ROOT.'/core/extrafieldsinexport.inc.php';
-        //$this->export_dependencies_array[$r] = array('myobjectline'=>array('tl.rowid','tl.ref')); // To force to activate one or several fields if we select some fields that need same (like to select a unique key if we ask a field of a child to avoid the DISTINCT to discard them, or for computed field than need several other fields)
+        //$this->export_dependencies_array[$r] = array('samlconnectoridpline'=>array('tl.rowid','tl.ref')); // To force to activate one or several fields if we select some fields that need same (like to select a unique key if we ask a field of a child to avoid the DISTINCT to discard them, or for computed field than need several other fields)
         //$this->export_special_array[$r] = array('t.field'=>'...');
         //$this->export_examplevalues_array[$r] = array('t.field'=>'Example');
         //$this->export_help_array[$r] = array('t.field'=>'FieldDescHelp');
         $this->export_sql_start[$r]='SELECT DISTINCT ';
-        $this->export_sql_end[$r]  =' FROM '.MAIN_DB_PREFIX.'myobject as t';
-        //$this->export_sql_end[$r]  =' LEFT JOIN '.MAIN_DB_PREFIX.'myobject_line as tl ON tl.fk_myobject = t.rowid';
+        $this->export_sql_end[$r]  =' FROM '.MAIN_DB_PREFIX.'samlconnectoridp as t';
+        //$this->export_sql_end[$r]  =' LEFT JOIN '.MAIN_DB_PREFIX.'samlconnectoridp_line as tl ON tl.fk_samlconnectoridp = t.rowid';
         $this->export_sql_end[$r] .=' WHERE 1 = 1';
-        $this->export_sql_end[$r] .=' AND t.entity IN ('.getEntity('myobject').')';
-        $r++; */ /* END MODULEBUILDER EXPORT MYOBJECT */
+        $this->export_sql_end[$r] .=' AND t.entity IN ('.getEntity('samlconnectoridp').')';
+        $r++; */ /* END MODULEBUILDER EXPORT SAMLCONNECTORIDP */
 
         // Imports profiles provided by this module
 //        $r = 1;
-        /* BEGIN MODULEBUILDER IMPORT MYOBJECT */ /*
+        /* BEGIN MODULEBUILDER IMPORT SAMLCONNECTORIDP */ /*
         $langs->load("samlconnector@samlconnector");
         $this->import_code[$r]=$this->rights_class.'_'.$r;
-        $this->import_label[$r]='MyObjectLines';	// Translation key (used only if key ExportDataset_xxx_z not found)
-        $this->import_icon[$r]='myobject@samlconnector';
-        $this->import_tables_array[$r] = array('t' => MAIN_DB_PREFIX.'samlconnector_myobject', 'extra' => MAIN_DB_PREFIX.'samlconnector_myobject_extrafields');
+        $this->import_label[$r]='SamlConnectorIDPLines';	// Translation key (used only if key ExportDataset_xxx_z not found)
+        $this->import_icon[$r]='samlconnectoridp@samlconnector';
+        $this->import_tables_array[$r] = array('t' => MAIN_DB_PREFIX.'samlconnector_samlconnectoridp', 'extra' => MAIN_DB_PREFIX.'samlconnector_samlconnectoridp_extrafields');
         $this->import_tables_creator_array[$r] = array('t' => 'fk_user_author'); // Fields to store import user id
         $import_sample = array();
-        $keyforclass = 'MyObject'; $keyforclassfile='/samlconnector/class/myobject.class.php'; $keyforelement='myobject@samlconnector';
+        $keyforclass = 'SamlConnectorIDP'; $keyforclassfile='/samlconnector/class/samlconnectoridp.class.php'; $keyforelement='samlconnectoridp@samlconnector';
         include DOL_DOCUMENT_ROOT.'/core/commonfieldsinimport.inc.php';
         $import_extrafield_sample = array();
-        $keyforselect='myobject'; $keyforaliasextra='extra'; $keyforelement='myobject@samlconnector';
+        $keyforselect='samlconnectoridp'; $keyforaliasextra='extra'; $keyforelement='samlconnectoridp@samlconnector';
         include DOL_DOCUMENT_ROOT.'/core/extrafieldsinimport.inc.php';
-        $this->import_fieldshidden_array[$r] = array('extra.fk_object' => 'lastrowid-'.MAIN_DB_PREFIX.'samlconnector_myobject');
+        $this->import_fieldshidden_array[$r] = array('extra.fk_object' => 'lastrowid-'.MAIN_DB_PREFIX.'samlconnector_samlconnectoridp');
         $this->import_regex_array[$r] = array();
         $this->import_examplevalues_array[$r] = array_merge($import_sample, $import_extrafield_sample);
         $this->import_updatekeys_array[$r] = array('t.ref' => 'Ref');
         $this->import_convertvalue_array[$r] = array(
             't.ref' => array(
                 'rule'=>'getrefifauto',
-                'class'=>(empty($conf->global->SAMLCONNECTOR_MYOBJECT_ADDON) ? 'mod_myobject_standard' : $conf->global->SAMLCONNECTOR_MYOBJECT_ADDON),
-                'path'=>"/core/modules/commande/".(empty($conf->global->SAMLCONNECTOR_MYOBJECT_ADDON) ? 'mod_myobject_standard' : $conf->global->SAMLCONNECTOR_MYOBJECT_ADDON).'.php'
-                'classobject'=>'MyObject',
-                'pathobject'=>'/samlconnector/class/myobject.class.php',
+                'class'=>(empty($conf->global->SAMLCONNECTOR_SAMLCONNECTORIDP_ADDON) ? 'mod_samlconnectoridp_standard' : $conf->global->SAMLCONNECTOR_SAMLCONNECTORIDP_ADDON),
+                'path'=>"/core/modules/commande/".(empty($conf->global->SAMLCONNECTOR_SAMLCONNECTORIDP_ADDON) ? 'mod_samlconnectoridp_standard' : $conf->global->SAMLCONNECTOR_SAMLCONNECTORIDP_ADDON).'.php'
+                'classobject'=>'SamlConnectorIDP',
+                'pathobject'=>'/samlconnector/class/samlconnectoridp.class.php',
             ),
             't.fk_soc' => array('rule' => 'fetchidfromref', 'file' => '/societe/class/societe.class.php', 'class' => 'Societe', 'method' => 'fetch', 'element' => 'ThirdParty'),
             't.fk_user_valid' => array('rule' => 'fetchidfromref', 'file' => '/user/class/user.class.php', 'class' => 'User', 'method' => 'fetch', 'element' => 'user'),
             't.fk_mode_reglement' => array('rule' => 'fetchidfromcodeorlabel', 'file' => '/compta/paiement/class/cpaiement.class.php', 'class' => 'Cpaiement', 'method' => 'fetch', 'element' => 'cpayment'),
         );
         $r++; */
-        /* END MODULEBUILDER IMPORT MYOBJECT */
+        /* END MODULEBUILDER IMPORT SAMLCONNECTORIDP */
     }
 
     /**
@@ -327,6 +350,7 @@ class modSamlConnector extends DolibarrModules {
      * @return int 1 if OK, 0 if KO
      */
     public function init($options = ''): int {
+		global $conf;
         $result = $this->_load_tables('/samlconnector/sql/');
         if($result < 0) return -1;  // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 
@@ -341,19 +365,30 @@ class modSamlConnector extends DolibarrModules {
 
         $sql = [];
 
+		if(! is_dir(DOL_DATA_ROOT.'/medias/samlconnector/idp')) {
+			$this->create_dirs();
+			$sourcePathDir = __DIR__.'/../../img/idp';
+			$sourceDir = opendir($sourcePathDir);
+			while($file = readdir($sourceDir)) {
+				if(($file != '.') && ($file != '..')) copy($sourcePathDir.'/'.$file, DOL_DATA_ROOT.'/medias/samlconnector/idp/'.$file);
+			}
+		}
+
+
+
         // Document templates
 //        $moduledir = dol_sanitizeFileName('samlconnector');
 //        $myTmpObjects = [];
-//        $myTmpObjects['MyObject'] = ['includerefgeneration' => 0, 'includedocgeneration' => 0];
+//        $myTmpObjects['SamlConnectorIDP'] = ['includerefgeneration' => 0, 'includedocgeneration' => 0];
 //
 //        foreach($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
-//            if($myTmpObjectKey == 'MyObject') {
+//            if($myTmpObjectKey == 'SamlConnectorIDP') {
 //                continue;
 //            }
 //            if($myTmpObjectArray['includerefgeneration']) {
-//                $src = DOL_DOCUMENT_ROOT.'/install/doctemplates/'.$moduledir.'/template_myobjects.odt';
+//                $src = DOL_DOCUMENT_ROOT.'/install/doctemplates/'.$moduledir.'/template_samlconnectoridps.odt';
 //                $dirodt = DOL_DATA_ROOT.'/doctemplates/'.$moduledir;
-//                $dest = $dirodt.'/template_myobjects.odt';
+//                $dest = $dirodt.'/template_samlconnectoridps.odt';
 //
 //                if(file_exists($src) && ! file_exists($dest)) {
 //                    require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';

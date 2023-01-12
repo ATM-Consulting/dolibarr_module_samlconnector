@@ -215,7 +215,7 @@ else {
                         print dol_nl2br($conf->global->{$constname});
                     }
                     else if($val['type'] == 'array') {
-                        print $langs->trans($conf->global->{$constname});
+                        if(!empty($conf->global->{$constname})) print $langs->trans($conf->global->{$constname});
                     }
                     else {
                         print $conf->global->{$constname};
