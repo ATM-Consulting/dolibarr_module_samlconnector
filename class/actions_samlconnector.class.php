@@ -222,7 +222,7 @@ class ActionsSamlConnector {
      */
 	public function getLoginPageOptions($parameters) {
 		global $langs, $conf;
-
+		$langs->load('samlconnector@samlconnector');
 		if (!empty($conf->global->SAMLCONNECTOR_IDP_DISPLAY_BUTTON)) {
 			if (!empty($conf->global->SAMLCONNECTOR_MANAGE_MULTIPLE_IDP)) {
 				dol_include_once('samlconnector/class/samlconnectoridp.class.php');
@@ -259,10 +259,17 @@ class ActionsSamlConnector {
 		else {
 			//Force login
 			include dirname(__FILE__).'/../lib/autoload.php';
-			$login = get_saml();
+			try {
+				$login = get_saml() ;
+			}
+			catch(Exception $e) {
+				setEventMessage($langs->trans('PleaseConfigureSamlConnectorModule', $e->getMessage()), 'errors');
+			}
+			finally {
+				$newpath = DOL_MAIN_URL_ROOT.'/index.php?mainmenu=home&leftmenu=home';
+				if(!empty($login)) $login->login($newpath);
+			}
 
-			$newpath = DOL_MAIN_URL_ROOT.'/index.php?mainmenu=home&leftmenu=home';
-			$login->login($newpath);
 		}
 	}
 

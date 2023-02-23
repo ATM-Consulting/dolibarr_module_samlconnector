@@ -60,3 +60,4 @@ MissingIDPFilePathOrUrl=Chemin du fichier ou URL de l'IDP manquant
 IDPDisabled=IDP Désactivé
 IDPEnabled=IDP Activé
 ConnectTo=Connexion via %s
+PleaseConfigureSamlConnectorModule=Tentative de redirection SAML échouée, veuillez configurer le module SAML Connector, <br> Détail de l'erreur : %s
