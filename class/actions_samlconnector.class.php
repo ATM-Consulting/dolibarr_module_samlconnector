@@ -241,14 +241,12 @@ class ActionsSamlConnector {
 					}
 					$this->resprints .= '</div>
 				<script type="text/javascript">
-				$(document).ready(function(){
 					$(".samlConnectorLoginButtonBlock").appendTo("#login-submit-wrapper");
                     $("#entity").on("change", function (){
                         let entity = $(this).val();
                         $(\'div[data-entity="\'+entity+\'"]\').removeClass("hidden");
                         $(\'div[data-entity][data-entity!="\'+entity+\'"]\').addClass("hidden");
                     })
-				});
 				</script>';
 				}
 			} else {
