@@ -34,6 +34,7 @@ SAMLCONNECTOR_MAPPING_USER_SEARCH_KEY = Champs utilisés pour la recherche dans 
 SAMLCONNECTOR_MAPPING_USER_LASTNAME = Nom
 SAMLCONNECTOR_MAPPING_USER_FIRSTNAME = Prénom
 SAMLCONNECTOR_MAPPING_USER_EMAIL = Email
+SAMLCONNECTOR_DISABLE_IDP_DISCONNECTION = Désactiver la fermeture de session de l'IDP lorsque vous vous déconnectez de Dolibarr
 
 # About page
 About = À propos
