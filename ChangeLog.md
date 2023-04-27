@@ -1,6 +1,7 @@
 # CHANGELOG SAMLCONNECTOR FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
 ## 2.0
+- NEW : Conf to disable idp disconnection synchronization *27/04/2023* 2.0.3
 - FIX : Useless document ready *27/02/2023* 2.0.2
 - NEW : Allow user to configure multiple IDP for one entity *12/01/2023* 2.0.0
 
