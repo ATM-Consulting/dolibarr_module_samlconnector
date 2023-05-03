@@ -63,6 +63,7 @@ $parameterSP = [
 $parameterIDP = [
 	'SAMLCONNECTOR_IDP_DISPLAY_BUTTON' => ['type' => 'yesno', 'enabled' => 1],
 	'SAMLCONNECTOR_MANAGE_MULTIPLE_IDP' => ['type' => 'yesno', 'enabled' => 1],
+	'SAMLCONNECTOR_DISABLE_IDP_DISCONNECTION' => ['type' => 'yesno', 'enabled' => 1],
 	'SAMLCONNECTOR_IDP_METADATA_SOURCE' => ['type' => 'array', 'data' => ['url' => 'url', 'localFile' => 'localFile'], 'enabled' => 1],
 	'SAMLCONNECTOR_IDP_METADATA_URL' => ['type' => 'string', 'enabled' => 1],
 	'SAMLCONNECTOR_IDP_METADATA_XML_PATH' => ['type' => 'string', 'enabled' => 1]
@@ -633,6 +634,8 @@ print dol_get_fiche_end();
             $('#del_SAMLCONNECTOR_MANAGE_MULTIPLE_IDP').css('pointer-events','none').addClass('opacitymedium');
             $('#del_SAMLCONNECTOR_IDP_DISPLAY_BUTTON').css('pointer-events','none').addClass('opacitymedium');
             $('#set_SAMLCONNECTOR_IDP_DISPLAY_BUTTON').css('pointer-events','none').addClass('opacitymedium');
+            $('#del_SAMLCONNECTOR_DISABLE_IDP_DISCONNECTION').css('pointer-events','none').addClass('opacitymedium');
+            $('#set_SAMLCONNECTOR_DISABLE_IDP_DISCONNECTION').css('pointer-events','none').addClass('opacitymedium');
         <?php } ?>
     </script>
 <?php

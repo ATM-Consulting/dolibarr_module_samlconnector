@@ -274,27 +274,29 @@ class ActionsSamlConnector {
     /**
      * @param array $parameters
      * @throws \OneLogin\Saml2\Error
-     */
-    public function afterLogout($parameters) {
-        global $conf;
+	 */
+	public function afterLogout($parameters)
+	{
+		global $conf;
 
-        if($_SESSION['dol_authmode'] != 'saml') return;
+		if ($_SESSION['dol_authmode'] != 'saml') return;
 
-        $urlfrom = empty($_SESSION['urlfrom']) ? '' : $_SESSION['urlfrom'];
+		$urlfrom = empty($_SESSION['urlfrom']) ? '' : $_SESSION['urlfrom'];
 
-        $url = DOL_URL_ROOT.'/index.php';        // By default, go to login page
-        if($urlfrom) $url = DOL_URL_ROOT.$urlfrom;
-        if(! empty($conf->global->MAIN_LOGOUT_GOTO_URL)) $url = $conf->global->MAIN_LOGOUT_GOTO_URL;
+		$url = DOL_URL_ROOT . '/index.php';        // By default, go to login page
+		if ($urlfrom) $url = DOL_URL_ROOT . $urlfrom;
+		if (!empty($conf->global->MAIN_LOGOUT_GOTO_URL)) $url = $conf->global->MAIN_LOGOUT_GOTO_URL;
 		$fk_idp = intval($_SESSION['dol_samlconnector_fk_idp']);
 
-        foreach(array_keys($_SESSION) as $key) {
-            unset($_SESSION[$key]);
-        }
-
-        include dirname(__FILE__).'/../lib/autoload.php';
-        $login = get_saml($fk_idp);
-        $login->logout($url);
-    }
+		foreach (array_keys($_SESSION) as $key) {
+			unset($_SESSION[$key]);
+		}
+		if (empty($conf->global->SAMLCONNECTOR_DISABLE_IDP_DISCONNECTION)) {
+			include dirname(__FILE__) . '/../lib/autoload.php';
+			$login = get_saml($fk_idp);
+			$login->logout($url);
+		}
+	}
 
 	public function selectForFormsListWhere($parameters, &$object, &$action, $hookmanager) {
 		if($parameters['currentcontext'] == 'samlconnectorsetup') {
