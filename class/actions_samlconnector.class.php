@@ -264,7 +264,7 @@ class ActionsSamlConnector {
 				setEventMessage($langs->trans('PleaseConfigureSamlConnectorModule', $e->getMessage()), 'errors');
 			}
 			finally {
-				$newpath = DOL_MAIN_URL_ROOT.'/index.php?mainmenu=home&leftmenu=home';
+				$newpath = $_SERVER['REQUEST_URI'];
 				if(!empty($login)) $login->login($newpath);
 			}
 
