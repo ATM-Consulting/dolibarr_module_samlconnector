@@ -51,6 +51,7 @@ $mappingFields = [
 ];
 
 $arrayofparameters = [
+        'SAMLCONNECTOR_ADMIN_USER_TO_UPDATE_WITH' => ['type' => 'user', 'enabled' => 1],
         'SAMLCONNECTOR_MAPPING_USER_SEARCH_KEY' => ['type' => 'array', 'data' => $mappingFields, 'enabled' => 1]
 ];
 
@@ -75,6 +76,15 @@ $dirmodels = array_merge(['/'], $conf->modules_parts['models']);
 /*
  * Actions
  */
+
+// Needed to set empty values to '0' instead of '-1'
+foreach($_POST as $k => $v) {
+    if(! isset($arrayofparameters[$k])) continue;
+    if(! in_array($arrayofparameters[$k]['type'], ['array', 'user'])) continue;
+
+    if($v == -1) $_POST[$k] = 0;
+}
+
 // For standard purpose
 $arrayofparameters = array_merge($arrayofparameters, $mappingFields);
 include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
@@ -174,6 +184,9 @@ if($action == 'edit') {
 
                     print Form::selectarray($constname, $data, $conf->global->$constname, 1);
                 }
+                else if($val['type'] == 'user') {
+                    print $form->select_dolusers($conf->global->$constname, $constname, 1, null, 0, '', '', 0, 0, 1, '', 0, '', '', 1);
+                }
                 else {
                     print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth400' : $val['css']).'" value="'.$conf->global->{$constname}.'">';
                 }
@@ -215,7 +228,15 @@ else {
                         print dol_nl2br($conf->global->{$constname});
                     }
                     else if($val['type'] == 'array') {
-                        if(!empty($conf->global->{$constname})) print $langs->trans($conf->global->{$constname});
+                        if(! empty($conf->global->{$constname}) && $conf->global->{$constname} != -1) print $langs->trans($conf->global->{$constname});
+                    }
+                    else if($val['type'] == 'user') {
+                        if(! empty($conf->global->{$constname})) {
+                            $u = new User($db);
+                            $res = $u->fetch($conf->global->{$constname});
+
+                            if($res) print $u->getNomUrl(1);
+                        }
                     }
                     else {
                         print $conf->global->{$constname};
