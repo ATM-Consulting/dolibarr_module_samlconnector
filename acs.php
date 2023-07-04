@@ -28,7 +28,7 @@ global $db, $conf, $langs, $hookmanager;
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once __DIR__.'/lib/autoload.php';
 
-$fk_idp = GETPOST('fk_idp', 'int');
+$fk_idp = intval(GETPOST('fk_idp', 'int'));
 
 $login = get_saml($fk_idp);
 
@@ -36,8 +36,9 @@ $login->processResponse();
 
 if($login->isAuthenticated()) {
     $user = new User($db);
+
     $admin = new User($db);
-    $admin->fetch('', 'admin');
+    if(! empty($conf->global->SAMLCONNECTOR_ADMIN_USER_TO_UPDATE_WITH)) $admin->fetch($conf->global->SAMLCONNECTOR_ADMIN_USER_TO_UPDATE_WITH);
 
     $res = $user->fetch('', $login->getNameId());
 
@@ -99,13 +100,17 @@ if($login->isAuthenticated()) {
         $reshook = $hookmanager->executeHooks('afterLogin', $parameters, $user, $action);    // Note that $action and $object may have been modified by some hooks
 
         $db->commit();
-        header('Location: '.DOL_URL_ROOT);
     }
 }
 
 if(isset($_REQUEST['RelayState'])) {
     $login->redirectTo($_REQUEST['RelayState']);
 }
+else {
+    header('Location: '.DOL_URL_ROOT);
+    exit;
+}
+
 ?>
 <a href="login.php">Login</a>
 <a href="logout.php">Logout</a>

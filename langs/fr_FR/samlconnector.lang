@@ -30,6 +30,7 @@ SamlConnectorSyncUserAdminGlobalTitleTab = Options globales de synchronisation
 SamlConnectorSyncUserAdminMappingTitleTab = Synchronisation des informations IDP
 SAMLCONNECTOR_CREATE_UNEXISTING_USER = Créer les utilisateurs inexistants dans dolibarr
 SAMLCONNECTOR_UPDATE_USER_EVERYTIME = Mettre à jour les utilisateurs à chaque connexion
+SAMLCONNECTOR_ADMIN_USER_TO_UPDATE_WITH = Utilisateur admin servant à la mise à jour des données
 SAMLCONNECTOR_MAPPING_USER_SEARCH_KEY = Champs utilisés pour la recherche dans Dolibarr
 SAMLCONNECTOR_MAPPING_USER_LASTNAME = Nom
 SAMLCONNECTOR_MAPPING_USER_FIRSTNAME = Prénom
