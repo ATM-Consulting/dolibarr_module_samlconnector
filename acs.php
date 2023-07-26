@@ -103,11 +103,11 @@ if($login->isAuthenticated()) {
     }
 }
 
-if(isset($_REQUEST['RelayState'])) {
+if(! empty($_REQUEST['RelayState'])) {
     $login->redirectTo($_REQUEST['RelayState']);
 }
 else {
-    header('Location: '.DOL_URL_ROOT);
+    header('Location: '.dol_buildpath('index.php', 2).'?mainmenu=home&leftmenu=home');
     exit;
 }
 
