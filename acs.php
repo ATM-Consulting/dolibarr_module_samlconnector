@@ -99,13 +99,13 @@ if($login->isAuthenticated()) {
         $reshook = $hookmanager->executeHooks('afterLogin', $parameters, $user, $action);    // Note that $action and $object may have been modified by some hooks
 
         $db->commit();
-        header('Location: '.DOL_URL_ROOT);
     }
 }
 
 if(isset($_REQUEST['RelayState'])) {
     $login->redirectTo($_REQUEST['RelayState']);
+} else {
+	header('Location: '.DOL_URL_ROOT);
+	exit;
 }
 ?>
-<a href="login.php">Login</a>
-<a href="logout.php">Logout</a>
