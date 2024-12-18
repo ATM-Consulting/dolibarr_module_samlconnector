@@ -13,5 +13,5 @@
 - NEW : Allow user to configure multiple IDP for one entity *12/01/2023* 2.0.0
 
 ## 1.0
-
+- FIX : Missing Encrypted Key Type *05/01/2023* 1.0.1
 Initial version
