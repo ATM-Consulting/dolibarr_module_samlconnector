@@ -37,7 +37,7 @@ $login->processResponse();
 if($login->isAuthenticated()) {
     $user = new User($db);
     $admin = new User($db);
-    $admin->fetch('', 'admin');
+    if(! empty($conf->global->SAMLCONNECTOR_ADMIN_USER_TO_UPDATE_WITH)) $admin->fetch($conf->global->SAMLCONNECTOR_ADMIN_USER_TO_UPDATE_WITH);
 
     $res = $user->fetch('', $login->getNameId());
 
@@ -115,10 +115,14 @@ if($login->isAuthenticated()) {
     }
 }
 
-if(isset($_REQUEST['RelayState'])) {
+if(! empty($_REQUEST['RelayState'])) {
     $login->redirectTo($_REQUEST['RelayState']);
-} else {
-    header('Location: '.DOL_URL_ROOT);
+}
+else {
+    header('Location: '.dol_buildpath('index.php', 2).'?mainmenu=home&leftmenu=home');
     exit;
 }
+
 ?>
+<a href="login.php">Login</a>
+<a href="logout.php">Logout</a>

@@ -30,6 +30,7 @@ SamlConnectorSyncUserAdminGlobalTitleTab = Global synchronization options
 SamlConnectorSyncUserAdminMappingTitleTab = Synchronization mapping
 SAMLCONNECTOR_CREATE_UNEXISTING_USER = Create unexisting users in Dolibarr
 SAMLCONNECTOR_UPDATE_USER_EVERYTIME = Update Dolibarr users on every connection
+SAMLCONNECTOR_ADMIN_USER_TO_UPDATE_WITH = Admin user used to update data with
 SAMLCONNECTOR_MAPPING_USER_SEARCH_KEY = Field used to search into Dolibarr
 SAMLCONNECTOR_MAPPING_USER_LASTNAME = Lastname
 SAMLCONNECTOR_MAPPING_USER_FIRSTNAME = Firstname
