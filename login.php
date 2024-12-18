@@ -26,11 +26,14 @@ for($i = 0 ; $i < 5 && ! $res ; $i++) $res = @include str_repeat('../', $i).$mai
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once __DIR__.'/lib/autoload.php';
 
-$login = get_saml();
+$fk_idp = GETPOST('fk_idp', 'int');
+$fk_idp = intval($fk_idp);
+$login = get_saml($fk_idp);
 
 $newpath = DOL_MAIN_URL_ROOT.'/index.php?mainmenu=home&leftmenu=home';
 $landingpage = empty($user->conf->MAIN_LANDING_PAGE) ? (empty($conf->global->MAIN_LANDING_PAGE) ? '' : $conf->global->MAIN_LANDING_PAGE) : $user->conf->MAIN_LANDING_PAGE;
 if(! empty($landingpage)) $newpath = dol_buildpath($landingpage, 1);
+
 
 $login->login($newpath);
 

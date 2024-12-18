@@ -315,6 +315,7 @@ class XMLSecurityKey
      */
     public function loadKey($key, $isFile=false, $isCert = false)
     {
+		global $conf;
         if ($isFile) {
             $this->key = file_get_contents($key);
         } else {
@@ -342,6 +343,7 @@ class XMLSecurityKey
 	                break;
 
 	            case 'private':
+					if(empty($this->passphrase) && !empty($conf->global->SAMLCONNECTOR_SP_PRIV_KEY_PASSPHRASE)) $this->passphrase = $conf->global->SAMLCONNECTOR_SP_PRIV_KEY_PASSPHRASE;
                     $this->key = openssl_get_privatekey($this->key, $this->passphrase);
                     break;
 

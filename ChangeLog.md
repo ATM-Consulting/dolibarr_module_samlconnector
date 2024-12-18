@@ -1,7 +1,13 @@
 # CHANGELOG SAMLCONNECTOR FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
+## 2.0
+- FIX : fetch entity from user if multicompany is enabled - *18/12/24* - 2.06
+- FIX : Disable admin on connection - *27/04/2023* - 2.0.5
+- NEW : Conf to disable idp disconnection synchronization *27/04/2023* 2.0.4
+- FIX : translation - *04/04/2023* - 2.0.3
+- FIX : Useless document ready *27/02/2023* 2.0.2
+- NEW : Allow user to configure multiple IDP for one entity *12/01/2023* 2.0.0
 
 ## 1.0
-- FIX : fetch entity from user if multicompany is enabled - *18/12/24* - 1.0.1 
-Initial version - 1.0.0
 
+Initial version
