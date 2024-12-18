@@ -67,7 +67,16 @@ if($login->isAuthenticated()) {
         $_SESSION['dol_screenheight'] = $dol_screenheight ?? '';
         $_SESSION['dol_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
         $_SESSION['dol_entity'] = $conf->entity;
-
+        if (isModEnabled('multicompany')) {
+            $entityFromDB = null;
+            $sql = "SELECT entity FROM " . MAIN_DB_PREFIX . "user WHERE login = '" . $db->escape($user->login) . "' AND statut = 1";
+            $resql = $db->query($sql);
+            if ($resql) {
+                $obj = $db->fetch_object($resql);
+                if ($obj) $entityFromDB = $obj->entity;
+            }
+            if ($entityFromDB) $_SESSION['dol_entity'] = $entityFromDB;
+        }
         // Store value into session (values stored only if defined)
         if(! empty($dol_hide_topmenu)) $_SESSION['dol_hide_topmenu'] = $dol_hide_topmenu;
         if(! empty($dol_hide_leftmenu)) $_SESSION['dol_hide_leftmenu'] = $dol_hide_leftmenu;
