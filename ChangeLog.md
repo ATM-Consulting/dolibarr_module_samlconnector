@@ -1,6 +1,7 @@
 # CHANGELOG SAMLCONNECTOR FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
 ## 2.0
+- NEW : Multicompany Management - *19/12/2024* - 2.1.0
 - FIX : Disable admin on connection - *27/04/2023* - 2.0.5
 - NEW : Conf to disable idp disconnection synchronization *27/04/2023* 2.0.4
 - FIX : translation - *04/04/2023* - 2.0.3
