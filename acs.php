@@ -71,24 +71,28 @@ if($login->isAuthenticated()) {
         $_SESSION['dol_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
         $_SESSION['dol_samlconnector_fk_idp'] = $fk_idp;
 
-        $entitytoconnect = $user->entity;
-        if (!empty(getDolGlobalInt('MULTICOMPANY_TRANSVERSE_MODE'))) {
-            $sql = "SELECT uu.entity";
-            $sql.= " FROM " . $db->prefix() . "usergroup_user as uu";
-            $sql.= ", " . $db->prefix() . "entity as e";
-            $sql.= " WHERE uu.entity = e.rowid AND e.visible < 2"; // Remove template of entity
-            $sql.= " AND uu.fk_user = " . $user->rowid;
+        if(GETPOSTISSET('entity')) {
+            $_SESSION['dol_entity'] = GETPOST('entity','int');
+        } else {
+            $entitytoconnect = $user->entity;
+            if (!empty(getDolGlobalInt('MULTICOMPANY_TRANSVERSE_MODE'))) {
+                $sql = "SELECT uu.entity";
+                $sql.= " FROM " . $db->prefix() . "usergroup_user as uu";
+                $sql.= ", " . $db->prefix() . "entity as e";
+                $sql.= " WHERE uu.entity = e.rowid AND e.visible < 2"; // Remove template of entity
+                $sql.= " AND uu.fk_user = " . $user->rowid;
 
-            dol_syslog("functions_mc::check_user_password_mc sql=" . $sql, LOG_DEBUG);
-            $result = $db->query($sql);
-            if (!empty($result)) {
-                while($array = $db->fetch_array($result)) { // user allowed if at least in one group
-                    $entitytoconnect = $array['entity'];
-                    break; // stop in first entity
+                dol_syslog("functions_mc::check_user_password_mc sql=" . $sql, LOG_DEBUG);
+                $result = $db->query($sql);
+                if (!empty($result)) {
+                    while($array = $db->fetch_array($result)) { // user allowed if at least in one group
+                        $entitytoconnect = $array['entity'];
+                        break; // stop in first entity
+                    }
                 }
             }
+            $_SESSION['dol_entity'] = $entitytoconnect;
         }
-        $_SESSION['dol_entity'] = $entitytoconnect;
 
         // Store value into session (values stored only if defined)
         if(! empty($dol_hide_topmenu)) $_SESSION['dol_hide_topmenu'] = $dol_hide_topmenu;
