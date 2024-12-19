@@ -72,10 +72,10 @@ if($login->isAuthenticated()) {
         $_SESSION['dol_samlconnector_fk_idp'] = $fk_idp;
 
         $entitytoconnect = $user->entity;
-        if (!empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE)) {
+        if (!empty(getDolGlobalInt('MULTICOMPANY_TRANSVERSE_MODE'))) {
             $sql = "SELECT uu.entity";
-            $sql.= " FROM " . MAIN_DB_PREFIX . "usergroup_user as uu";
-            $sql.= ", " . MAIN_DB_PREFIX . "entity as e";
+            $sql.= " FROM " . $db->prefix() . "usergroup_user as uu";
+            $sql.= ", " . $db->prefix() . "entity as e";
             $sql.= " WHERE uu.entity = e.rowid AND e.visible < 2"; // Remove template of entity
             $sql.= " AND uu.fk_user = " . $user->rowid;
 
