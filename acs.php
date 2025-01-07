@@ -60,8 +60,8 @@ if($login->isAuthenticated()) {
     if(! empty($user->login)) {
         $_SESSION['dol_login'] = $user->login;
         $_SESSION['dol_authmode'] = 'saml';
-        $_SESSION['dol_tz'] = $dol_tz ?? '';
-        $_SESSION['dol_tz_string'] = $dol_tz_string ?? '';
+		$_SESSION['dol_tz'] = $dol_tz ?? '1';
+		$_SESSION['dol_tz_string'] = $dol_tz_string ?? 'Europe/Paris';
         $_SESSION['dol_dst'] = $dol_dst ?? '';
         $_SESSION['dol_dst_observed'] = $dol_dst_observed ?? '';
         $_SESSION['dol_dst_first'] = $dol_dst_first ?? '';
