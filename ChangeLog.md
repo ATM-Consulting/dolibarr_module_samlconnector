@@ -1,6 +1,7 @@
 # CHANGELOG SAMLCONNECTOR FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
 ## 2.0
+- FIX : Error logged in dolibarr.log due to type of return value for hook selectForFormsListWhere - *17/01/2025* - 2.0.8
 - NEW : Admin user const - *04/07/2023* - 2.0.6
 - FIX : Img size - *04/07/2023* - 2.0.6
 - FIX : Gestion de la redirection via l'option 'RelayState' - *04/07/2023* - 2.0.6

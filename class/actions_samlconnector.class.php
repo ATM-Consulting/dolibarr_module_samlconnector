@@ -302,5 +302,6 @@ class ActionsSamlConnector {
 		if($parameters['currentcontext'] == 'samlconnectorsetup') {
 			$this->resprints = ' WHERE t.active = 1';
 		}
+		return 0;
 	}
 }
