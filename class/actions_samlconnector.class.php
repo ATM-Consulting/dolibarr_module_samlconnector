@@ -296,6 +296,7 @@ class ActionsSamlConnector {
 			$login = get_saml($fk_idp);
 			$login->logout($url);
 		}
+		return 0;
 	}
 
 	public function selectForFormsListWhere($parameters, &$object, &$action, $hookmanager) {
