@@ -51,7 +51,7 @@ if($login->isAuthenticated()) {
 
     if($res <= 0 && ! empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER)) {
         $user->login = $login->getNameId();
-        $user->create($admin);
+		$user->create($admin);
     }
     elseif($res > 0 && ! empty($conf->global->SAMLCONNECTOR_UPDATE_USER_EVERYTIME)) {
         $user->update($admin);
