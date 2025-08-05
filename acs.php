@@ -31,7 +31,6 @@ require_once __DIR__.'/lib/autoload.php';
 $fk_idp = intval(GETPOST('fk_idp', 'int'));
 
 $login = get_saml($fk_idp);
-
 $login->processResponse();
 
 if($login->isAuthenticated()) {
