@@ -56,7 +56,7 @@ $globalFields = [
 	'SAMLCONNECTOR_USER_DEFAULT_ENTITY' => ['type' => 'category:entity', 'enabled' => 1]
 ];
 
-$arrayofparameters = [
+$arrayofparameters_search_key = [
 	'SAMLCONNECTOR_MAPPING_USER_SEARCH_KEY' => ['type' => 'array', 'data' => $mappingFields, 'enabled' => 1]
 ];
 
@@ -81,14 +81,11 @@ $dirmodels = array_merge(['/'], $conf->modules_parts['models']);
 /*
  * Actions
  */
-
 // MODIFICATION : On fusionne tous les paramètres pour la sauvegarde
-$arrayofparameters_for_save = array_merge($arrayofparameters, $mappingFields, $globalFields);
+$arrayofparameters = array_merge($arrayofparameters_search_key, $mappingFields, $globalFields);
 // On renomme la variable pour éviter toute confusion avec les boucles d'affichage
 include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
 // Le script include utilise la variable nommée $arrayofparameters, donc on doit la préparer juste avant
-$arrayofparameters = $arrayofparameters_for_save;
-
 /*
  * View
  */
@@ -128,48 +125,39 @@ print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_CREATE_UNEXISTING
 print '<td>'.ajax_constantonoff('SAMLCONNECTOR_CREATE_UNEXISTING_USER').'</td>';
 print '</tr>';
 
-// --- Champ Groupe par défaut ---
+// ... champ 'groupe par défaut'
 print '<tr class="oddeven">';
 print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_USER_DEFAULT_GROUP'), $langs->trans('SAMLCONNECTOR_USER_DEFAULT_GROUPTooltip')).'</td>';
 print '<td>';
 if ($action == 'edit') {
-	// Mode édition : on affiche la liste déroulante
-	print $form->select_dolgroups($conf->global->SAMLCONNECTOR_USER_DEFAULT_GROUP, 'SAMLCONNECTOR_USER_DEFAULT_GROUP', 1);
+	print $form->select_dolgroups(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_GROUP'), 'SAMLCONNECTOR_USER_DEFAULT_GROUP', 1);
 } else {
-	// Mode lecture : on affiche le nom du groupe
-	if (! empty($conf->global->SAMLCONNECTOR_USER_DEFAULT_GROUP)) {
+	if (getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_GROUP')) {
 		require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
 		$group_static = new UserGroup($db);
-		if ($group_static->fetch($conf->global->SAMLCONNECTOR_USER_DEFAULT_GROUP) > 0) {
-			print $group_static->getNomUrl(1);
-		} else {
-			print $langs->trans("ErrorUnknown");
-		}
+		if ($group_static->fetch(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_GROUP')) > 0) { print $group_static->getNomUrl(1); }
+		else { print $langs->trans("ErrorUnknown"); }
 	}
 }
 print '</td>';
 print '</tr>';
 
-
-// --- Champ Entité par défaut (si multicompany est activé) ---
+// ... champ 'entité par défaut'
 if (isModEnabled('multicompany')) {
 	global $mc;
 	print '<tr class="oddeven">';
 	print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_USER_DEFAULT_ENTITY'), $langs->trans('SAMLCONNECTOR_USER_DEFAULT_ENTITYTooltip')).'</td>';
 	print '<td>';
 	if ($action == 'edit') {
-		// Mode édition : on affiche la liste déroulante des entités
-		print $mc->select_entities($conf->global->SAMLCONNECTOR_USER_DEFAULT_ENTITY, 'SAMLCONNECTOR_USER_DEFAULT_ENTITY');
+		print $mc->select_entities(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_ENTITY'), 'SAMLCONNECTOR_USER_DEFAULT_ENTITY');
 	} else {
-		// Mode lecture : on affiche le nom de l'entité
-		if (! empty($conf->global->SAMLCONNECTOR_USER_DEFAULT_ENTITY)) {
-			require_once DOL_DOCUMENT_ROOT.'/core/class/multicompany.class.php';
-			$mc_static = new MultiCompany($db);
-			if ($mc_static->fetch($conf->global->SAMLCONNECTOR_USER_DEFAULT_ENTITY) > 0) {
-				print $mc_static->name;
-			} else {
-				print $langs->trans("ErrorUnknown");
+		if (! empty(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_ENTITY'))) {
+			dol_buildpath('multicompany/class/dao_multicompany.class.php.');
+			$mcDao = new DaoMulticompany($db);
+			if ($mcDao->fetch(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_ENTITY')) > 0) {
+				print $mcDao->label;
 			}
+			else { print $langs->trans("ErrorUnknown"); }
 		}
 	}
 	print '</td>';
@@ -189,7 +177,8 @@ print '</table>';
 print load_fiche_titre($langs->trans('SamlConnectorSyncUserAdminMappingTitleTab'), '', '');
 
 // On prépare le tableau de paramètres pour les boucles d'affichage du mapping
-$mapping_display_params = array_merge($arrayofparameters, $mappingFields);
+$mapping_display_params = array_merge($arrayofparameters_search_key, $mappingFields);
+
 
 if($action == 'edit') {
 	if($useFormSetup && (float) DOL_VERSION >= 15.0) {
