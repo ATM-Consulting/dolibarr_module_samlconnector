@@ -105,8 +105,7 @@ if($login->isAuthenticated()) {
         $db->begin();
 		$hookmanager->initHooks(['login']);
 		$parameters = ['dol_authmode' => 'saml'];
-		$reshook = $hookmanager->executeHooks('afterLogin', $parameters, $user, $action);
-//		$reshook = $hookmanager->executeHooks('afterLoginBeforeUpdateLastLoginDate', $parameters, $user, $action);
+		$reshook = $hookmanager->executeHooks('afterLoginBeforeUpdateLastLoginDate', $parameters, $user, $action);
 		$user->update_last_login_date();
 
         $loginfo = 'TZ='.$_SESSION['dol_tz'].';TZString='.$_SESSION['dol_tz_string'].';Screen='.$_SESSION['dol_screenwidth'].'x'.$_SESSION['dol_screenheight'];
@@ -119,7 +118,7 @@ if($login->isAuthenticated()) {
         $result = $interface->run_triggers('USER_LOGIN', $user, $user, $langs, $conf);
 
         $parameters = ['dol_authmode' => 'saml', 'dol_loginfo' => $loginfo];
-//        $reshook = $hookmanager->executeHooks('afterLogin', $parameters, $user, $action);    // Note that $action and $object may have been modified by some hooks
+        $reshook = $hookmanager->executeHooks('afterLogin', $parameters, $user, $action);    // Note that $action and $object may have been modified by some hooks
 
         $db->commit();
     }
