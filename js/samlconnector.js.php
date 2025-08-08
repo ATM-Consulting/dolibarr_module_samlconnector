@@ -68,8 +68,26 @@ function copyToClipBoardAnimation(el, cpResult = true) {
 }
 
 $(document).ready(function() {
-    $('body').on('click', '.samlCopyClipboard', function() {
-        copyToClipBoardCommand($(this).find('span').text());
-        copyToClipBoardAnimation($(this));
-    });
+	// Handles the click on the clipboard copy button
+	$('body').on('click', '.samlCopyClipboard', function() {
+		copyToClipBoardCommand($(this).find('span').text());
+		copyToClipBoardAnimation($(this));
+	});
+
+	// --- Logic for the on/off toggle button ---
+	// The name of the constant that the button modifies
+	const code = 'SAMLCONNECTOR_CREATE_UNEXISTING_USER';
+
+	// Attach a click listener to the document.
+	// It will ONLY activate if the clicked element is our "set" button.
+	// This is the most reliable method, as it works even if the button is loaded dynamically.
+	$(document).on('click', '#set_' + code, function() {
+		// The "set" button is clicked (enabling the feature), so we SHOW the rows.
+		$('#row_default_group, #row_default_entity').show();
+	});
+	// We do the same for the "del" button.
+	$(document).on('click', '#del_' + code, function() {
+		// The "del" button is clicked (disabling the feature), so we HIDE the rows.
+		$('#row_default_group, #row_default_entity').hide();
+	});
 });

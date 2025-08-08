@@ -197,7 +197,7 @@ function saml_settings(int $fk_idp = 0): array {
 
             // Indicates whether the <samlp:AuthnRequest> messages sent by this SP
             // will be signed.  [Metadata of the SP will offer this info]
-            'authnRequestsSigned' => true,
+            'authnRequestsSigned' => false, // DIFF trouvé sur la prod
 
             // Indicates whether the <samlp:logoutRequest> messages sent by this SP
             // will be signed.

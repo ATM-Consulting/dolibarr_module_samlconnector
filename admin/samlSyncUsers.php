@@ -45,13 +45,18 @@ $label = GETPOST('label', 'alpha');
 $scandir = GETPOST('scan_dir', 'alpha');
 
 $mappingFields = [
-    'SAMLCONNECTOR_MAPPING_USER_LASTNAME' => ['type' => 'string', 'enabled' => 1],
-    'SAMLCONNECTOR_MAPPING_USER_FIRSTNAME' => ['type' => 'string', 'enabled' => 1],
-    'SAMLCONNECTOR_MAPPING_USER_EMAIL' => ['type' => 'string', 'enabled' => 1]
+	'SAMLCONNECTOR_MAPPING_USER_LASTNAME' => ['type' => 'string', 'enabled' => 1],
+	'SAMLCONNECTOR_MAPPING_USER_FIRSTNAME' => ['type' => 'string', 'enabled' => 1],
+	'SAMLCONNECTOR_MAPPING_USER_EMAIL' => ['type' => 'string', 'enabled' => 1]
 ];
 
-$arrayofparameters = [
-        'SAMLCONNECTOR_MAPPING_USER_SEARCH_KEY' => ['type' => 'array', 'data' => $mappingFields, 'enabled' => 1]
+$globalFields = [
+	'SAMLCONNECTOR_USER_DEFAULT_GROUP' => ['type' => 'category:group', 'enabled' => 1],
+	'SAMLCONNECTOR_USER_DEFAULT_ENTITY' => ['type' => 'category:entity', 'enabled' => 1]
+];
+
+$arrayofparameters_search_key = [
+	'SAMLCONNECTOR_MAPPING_USER_SEARCH_KEY' => ['type' => 'array', 'data' => $mappingFields, 'enabled' => 1]
 ];
 
 $error = 0;
@@ -61,13 +66,13 @@ $setupnotempty = 0;
 $useFormSetup = 0;
 
 if(! class_exists('FormSetup')) {
-    // For retrocompatibility Dolibarr < 16.0
-    if(floatval(DOL_VERSION) < 16.0 && ! class_exists('FormSetup')) {
-        require_once __DIR__.'/../backport/v16/core/class/html.formsetup.class.php';
-    }
-    else {
-        require_once DOL_DOCUMENT_ROOT.'/core/class/html.formsetup.class.php';
-    }
+	// For retrocompatibility Dolibarr < 16.0
+	if(floatval(DOL_VERSION) < 16.0 && ! class_exists('FormSetup')) {
+		require_once __DIR__.'/../backport/v16/core/class/html.formsetup.class.php';
+	}
+	else {
+		require_once DOL_DOCUMENT_ROOT.'/core/class/html.formsetup.class.php';
+	}
 }
 
 $dirmodels = array_merge(['/'], $conf->modules_parts['models']);
@@ -75,10 +80,8 @@ $dirmodels = array_merge(['/'], $conf->modules_parts['models']);
 /*
  * Actions
  */
-// For standard purpose
-$arrayofparameters = array_merge($arrayofparameters, $mappingFields);
+$arrayofparameters = array_merge($arrayofparameters_search_key, $mappingFields, $globalFields);
 include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
-
 /*
  * View
  */
@@ -99,6 +102,12 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 $head = samlconnectorAdminPrepareHead();
 print dol_get_fiche_head($head, 'samlSyncUsers', $langs->trans($page_name), -1, 'samlconnector@samlconnector');
 
+if ($action == 'edit') {
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+	print '<input type="hidden" name="token" value="'.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">';
+	print '<input type="hidden" name="action" value="update">';
+}
+
 // Global synchronization options
 print load_fiche_titre($langs->trans('SamlConnectorSyncUserAdminGlobalTitleTab'), '', '');
 
@@ -106,137 +115,184 @@ print '<table class="noborder centpercent">';
 print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
 
 $tooltiphelp = $langs->trans('SAMLCONNECTOR_CREATE_UNEXISTING_USERTooltip') != 'SAMLCONNECTOR_CREATE_UNEXISTING_USERTooltip' ? $langs->trans('SAMLCONNECTOR_CREATE_UNEXISTING_USERTooltip') : '';
-print '<tr class="oddeven">';
+print '<tr class="oddeven" id="row_toggle_create_user">';
 print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_CREATE_UNEXISTING_USER'), $tooltiphelp).'</td>';
 print '<td>'.ajax_constantonoff('SAMLCONNECTOR_CREATE_UNEXISTING_USER').'</td>';
 print '</tr>';
+
+$createUnexistingUser = getDolGlobalString('SAMLCONNECTOR_CREATE_UNEXISTING_USER');
+$styleHidden = !$createUnexistingUser ? 'style="display: none;"' : '';
+// ... champ 'groupe par défaut'
+print '<tr class="oddeven" id="row_default_group" '.$styleHidden.'>';
+print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_USER_DEFAULT_GROUP'), $langs->trans('SAMLCONNECTOR_USER_DEFAULT_GROUPTooltip')).'</td>';
+print '<td>';
+if ($action == 'edit') {
+	print $form->select_dolgroups(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_GROUP'), 'SAMLCONNECTOR_USER_DEFAULT_GROUP', 1);
+} else {
+	if (getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_GROUP')) {
+		require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
+		$group_static = new UserGroup($db);
+		if ($group_static->fetch(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_GROUP')) > 0) { print $group_static->getNomUrl(1); }
+		else { print $langs->trans("ErrorUnknown"); }
+	}
+}
+print '</td>';
+print '</tr>';
+
+// ... champ 'entité par défaut'
+if (isModEnabled('multicompany')) {
+	global $mc;
+	print '<tr class="oddeven" id="row_default_entity" '.$styleHidden.'>';
+	print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_USER_DEFAULT_ENTITY'), $langs->trans('SAMLCONNECTOR_USER_DEFAULT_ENTITYTooltip')).'</td>';
+	print '<td>';
+	if ($action == 'edit') {
+		print $mc->select_entities(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_ENTITY'), 'SAMLCONNECTOR_USER_DEFAULT_ENTITY');
+	} else {
+		if (! empty(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_ENTITY'))) {
+			dol_buildpath('multicompany/class/dao_multicompany.class.php.');
+			$mcDao = new DaoMulticompany($db);
+			if ($mcDao->fetch(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_ENTITY')) > 0) {
+				print $mcDao->label;
+			}
+			else { print $langs->trans("ErrorUnknown"); }
+		}
+	}
+	print '</td>';
+	print '</tr>';
+}
 
 $tooltiphelp = $langs->trans('SAMLCONNECTOR_UPDATE_USER_EVERYTIMETooltip') != 'SAMLCONNECTOR_UPDATE_USER_EVERYTIMETooltip' ? $langs->trans('SAMLCONNECTOR_UPDATE_USER_EVERYTIMETooltip') : '';
 print '<tr class="oddeven">';
 print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_UPDATE_USER_EVERYTIME'), $tooltiphelp).'</td>';
 print '<td>'.ajax_constantonoff('SAMLCONNECTOR_UPDATE_USER_EVERYTIME').'</td>';
 print '</tr>';
+
 print '</table>';
+
 
 // Mapping
 print load_fiche_titre($langs->trans('SamlConnectorSyncUserAdminMappingTitleTab'), '', '');
 
+// On prépare le tableau de paramètres pour les boucles d'affichage du mapping
+$mapping_display_params = array_merge($arrayofparameters_search_key, $mappingFields);
+
+
 if($action == 'edit') {
-    if($useFormSetup && (float) DOL_VERSION >= 15.0) {
-        $formSetup = new FormSetup($db);
-        print $formSetup->generateOutput(true);
-    }
-    else {
-        print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-        print '<input type="hidden" name="token" value="'.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">';
-        print '<input type="hidden" name="action" value="update">';
+	if($useFormSetup && (float) DOL_VERSION >= 15.0) {
+		$formSetup = new FormSetup($db);
+		print $formSetup->generateOutput(true);
+	}
+	else {
+		print '<table class="noborder centpercent">';
+		print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
 
-        print '<table class="noborder centpercent">';
-        print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
+		foreach($mapping_display_params as $constname => $val) {
+			if($val['enabled'] == 1) {
+				$setupnotempty++;
+				print '<tr class="oddeven"><td>';
+				$tooltiphelp = $langs->trans($constname.'Tooltip') != $constname.'Tooltip' ? $langs->trans($constname.'Tooltip') : '';
+				print '<span id="helplink'.$constname.'" class="spanforparamtooltip">'.$form->textwithpicto($langs->trans($constname), $tooltiphelp, 1, 'info', '', 0, 3, 'tootips'.$constname).'</span>';
+				print '</td><td>';
 
-        foreach($arrayofparameters as $constname => $val) {
-            if($val['enabled'] == 1) {
-                $setupnotempty++;
-                print '<tr class="oddeven"><td>';
-                $tooltiphelp = $langs->trans($constname.'Tooltip') != $constname.'Tooltip' ? $langs->trans($constname.'Tooltip') : '';
-                print '<span id="helplink'.$constname.'" class="spanforparamtooltip">'.$form->textwithpicto($langs->trans($constname), $tooltiphelp, 1, 'info', '', 0, 3, 'tootips'.$constname).'</span>';
-                print '</td><td>';
-
-                if($val['type'] == 'textarea') {
-                    print '<textarea class="flat" name="'.$constname.'" id="'.$constname.'" cols="50" rows="5" wrap="soft">'."\n";
-                    print $conf->global->{$constname};
-                    print "</textarea>\n";
-                }
-                else if($val['type'] == 'securekey') {
-                    print '<input required="required" type="text" class="flat" id="'.$constname.'" name="'.$constname.'" value="'.(GETPOST($constname, 'alpha') ? GETPOST($constname, 'alpha') : $conf->global->{$constname}).'" size="40">';
-                    if(! empty($conf->use_javascript_ajax)) {
-                        print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token'.$constname.'" class="linkobject"');
-                    }
-                    if(! empty($conf->use_javascript_ajax)) {
-                        print "\n".'<script type="text/javascript">';
-                        print '$(document).ready(function () {
+				if($val['type'] == 'textarea') {
+					print '<textarea class="flat" name="'.$constname.'" id="'.$constname.'" cols="50" rows="5" wrap="soft">'."\n";
+					print getDolGlobalString($constname);
+					print "</textarea>\n";
+				}
+				else if($val['type'] == 'securekey') {
+					print '<input required="required" type="text" class="flat" id="'.$constname.'" name="'.$constname.'" value="'.(GETPOST($constname, 'alpha') ? GETPOST($constname, 'alpha') : getDolGlobalString($constname)).'" size="40">';
+					if(! empty($conf->use_javascript_ajax)) {
+						print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token'.$constname.'" class="linkobject"');
+					}
+					if(! empty($conf->use_javascript_ajax)) {
+						print "\n".'<script type="text/javascript">';
+						print '$(document).ready(function () {
                         $("#generate_token'.$constname.'").click(function() {
-                	        $.get( "'.DOL_URL_ROOT.'/core/ajax/security.php", {
-                		      action: \'getrandompassword\',
-                		      generic: true
-    				        },
-    				        function(token) {
-    					       $("#'.$constname.'").val(token);
-            				});
+                            $.get( "'.DOL_URL_ROOT.'/core/ajax/security.php", {
+                             action: \'getrandompassword\',
+                             generic: true
+                         },
+                         function(token) {
+                           $("#'.$constname.'").val(token);
+                         });
                          });
                     });';
-                        print '</script>';
-                    }
-                }
-                else if($val['type'] == 'array') {
-                    $data = [];
-                    foreach($val['data'] as $k => $v) $data[$k] = $langs->trans($k);
+						print '</script>';
+					}
+				}
+				else if($val['type'] == 'array') {
+					$data = [];
+					foreach($val['data'] as $k => $v) $data[$k] = $langs->trans($k);
 
-                    print Form::selectarray($constname, $data, $conf->global->$constname, 1);
-                }
-                else {
-                    print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth400' : $val['css']).'" value="'.$conf->global->{$constname}.'">';
-                }
-                print '</td></tr>';
-            }
-        }
-        print '</table>';
+					print Form::selectarray($constname, $data, getDolGlobalString($constname), 1);
+				}
+				else {
+					print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth400' : $val['css']).'" value="'.getDolGlobalString($constname).'">';
+				}
+				print '</td></tr>';
+			}
+		}
+		print '</table>';
 
-        print '<br><div class="center">';
-        print '<input class="button button-save" type="submit" value="'.$langs->trans('Save').'">';
-        print '</div>';
+		print '<br><div class="center">';
+		print '<input class="button button-save" type="submit" value="'.$langs->trans('Save').'">';
+		print '</div>';
 
-        print '</form>';
-    }
+	}
 
-    print '<br>';
+	print '<br>';
 }
-else {
-    if($useFormSetup && (float) DOL_VERSION >= 15.0) {
-        $formSetup = new FormSetup($db);
-        if(! empty($formSetup->items)) {
-            print $formSetup->generateOutput();
-        }
-    }
-    else {
-        if(! empty($arrayofparameters)) {
-            print '<table class="noborder centpercent">';
-            print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
+else { // Mode lecture
+	if($useFormSetup && (float) DOL_VERSION >= 15.0) {
+		$formSetup = new FormSetup($db);
+		if(! empty($formSetup->items)) {
+			print $formSetup->generateOutput();
+		}
+	}
+	else {
+		if(! empty($mapping_display_params)) {
+			print '<table class="noborder centpercent">';
+			print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
 
-            foreach($arrayofparameters as $constname => $val) {
-                if($val['enabled'] == 1) {
-                    $setupnotempty++;
-                    print '<tr class="oddeven"><td>';
-                    $tooltiphelp = $langs->trans($constname.'Tooltip') != $constname.'Tooltip' ? $langs->trans($constname.'Tooltip') : '';
-                    print $form->textwithpicto($langs->trans($constname), $tooltiphelp);
-                    print '</td><td>';
+			foreach($mapping_display_params as $constname => $val) {
+				if($val['enabled'] == 1) {
+					$setupnotempty++;
+					print '<tr class="oddeven"><td>';
+					$tooltiphelp = $langs->trans($constname.'Tooltip') != $constname.'Tooltip' ? $langs->trans($constname.'Tooltip') : '';
+					print $form->textwithpicto($langs->trans($constname), $tooltiphelp);
+					print '</td><td>';
 
-                    if($val['type'] == 'textarea') {
-                        print dol_nl2br($conf->global->{$constname});
-                    }
-                    else if($val['type'] == 'array') {
-                        if(!empty($conf->global->{$constname})) print $langs->trans($conf->global->{$constname});
-                    }
-                    else {
-                        print $conf->global->{$constname};
-                    }
-                    print '</td></tr>';
-                }
-            }
+					if($val['type'] == 'textarea') {
+						print dol_nl2br(getDolGlobalString($constname));
+					}
+					else if($val['type'] == 'array') {
+						if(getDolGlobalString($constname)) print $langs->trans(getDolGlobalString($constname));
+					}
+					else {
+						print getDolGlobalString($constname);
+					}
+					print '</td></tr>';
+				}
+			}
 
-            print '</table>';
-        }
-    }
+			print '</table>';
+		}
+	}
 
-    if($setupnotempty) {
-        print '<div class="tabsAction">';
-        print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=edit&token='.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">'.$langs->trans('Modify').'</a>';
-        print '</div>';
-    }
+	if($setupnotempty) {
+		print '<div class="tabsAction">';
+		print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=edit&token='.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">'.$langs->trans('Modify').'</a>';
+		print '</div>';
+	}
 }
+
+if ($action == 'edit') {
+	print '</form>';
+}
+
 
 if(empty($setupnotempty)) {
-    print '<br>'.$langs->trans('NothingToSetup');
+	print '<br>'.$langs->trans('NothingToSetup');
 }
 
 // Page end

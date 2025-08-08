@@ -31,7 +31,6 @@ require_once __DIR__.'/lib/autoload.php';
 $fk_idp = intval(GETPOST('fk_idp', 'int'));
 
 $login = get_saml($fk_idp);
-
 $login->processResponse();
 
 if($login->isAuthenticated()) {
@@ -44,14 +43,14 @@ if($login->isAuthenticated()) {
     if(! empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER) || ! empty($conf->global->SAMLCONNECTOR_UPDATE_USER_EVERYTIME)) {
         $user->firstname = $login->getAttribute($conf->global->SAMLCONNECTOR_MAPPING_USER_FIRSTNAME)[0];
         $user->lastname = $login->getAttribute($conf->global->SAMLCONNECTOR_MAPPING_USER_LASTNAME)[0];
-//        $user->admin = in_array('ADMINISTRATOR', $login->getAttribute('type')) ? 1 : 0;
+//      $user->admin = in_array('ADMINISTRATOR', $login->getAttribute('type')) ? 1 : 0;
         $user->email = $login->getAttribute($conf->global->SAMLCONNECTOR_MAPPING_USER_EMAIL)[0];
     }
 
 
     if($res <= 0 && ! empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER)) {
         $user->login = $login->getNameId();
-        $user->create($admin);
+		$user->create($admin);
     }
     elseif($res > 0 && ! empty($conf->global->SAMLCONNECTOR_UPDATE_USER_EVERYTIME)) {
         $user->update($admin);
@@ -104,7 +103,10 @@ if($login->isAuthenticated()) {
         dol_syslog("This is a new started user session. _SESSION['dol_login']=".$_SESSION['dol_login'].' Session id='.session_id());
 
         $db->begin();
-        $user->update_last_login_date();
+		$hookmanager->initHooks(['login']);
+		$parameters = ['dol_authmode' => 'saml'];
+		$reshook = $hookmanager->executeHooks('afterLoginBeforeUpdateLastLoginDate', $parameters, $user, $action);
+		$user->update_last_login_date();
 
         $loginfo = 'TZ='.$_SESSION['dol_tz'].';TZString='.$_SESSION['dol_tz_string'].';Screen='.$_SESSION['dol_screenwidth'].'x'.$_SESSION['dol_screenheight'];
 
@@ -115,7 +117,6 @@ if($login->isAuthenticated()) {
         $interface = new Interfaces($db);
         $result = $interface->run_triggers('USER_LOGIN', $user, $user, $langs, $conf);
 
-        $hookmanager->initHooks(['login']);
         $parameters = ['dol_authmode' => 'saml', 'dol_loginfo' => $loginfo];
         $reshook = $hookmanager->executeHooks('afterLogin', $parameters, $user, $action);    // Note that $action and $object may have been modified by some hooks
 
