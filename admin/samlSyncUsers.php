@@ -120,13 +120,15 @@ print '<table class="noborder centpercent">';
 print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
 
 $tooltiphelp = $langs->trans('SAMLCONNECTOR_CREATE_UNEXISTING_USERTooltip') != 'SAMLCONNECTOR_CREATE_UNEXISTING_USERTooltip' ? $langs->trans('SAMLCONNECTOR_CREATE_UNEXISTING_USERTooltip') : '';
-print '<tr class="oddeven">';
+print '<tr class="oddeven" id="row_toggle_create_user">';
 print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_CREATE_UNEXISTING_USER'), $tooltiphelp).'</td>';
 print '<td>'.ajax_constantonoff('SAMLCONNECTOR_CREATE_UNEXISTING_USER').'</td>';
 print '</tr>';
 
+$createUnexistingUser = !empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER);
+$styleHidden = !$createUnexistingUser ? 'style="display: none;"' : '';
 // ... champ 'groupe par défaut'
-print '<tr class="oddeven">';
+print '<tr class="oddeven" id="row_default_group" '.$styleHidden.'>';
 print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_USER_DEFAULT_GROUP'), $langs->trans('SAMLCONNECTOR_USER_DEFAULT_GROUPTooltip')).'</td>';
 print '<td>';
 if ($action == 'edit') {
@@ -145,7 +147,7 @@ print '</tr>';
 // ... champ 'entité par défaut'
 if (isModEnabled('multicompany')) {
 	global $mc;
-	print '<tr class="oddeven">';
+	print '<tr class="oddeven" id="row_default_entity" '.$styleHidden.'>';
 	print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_USER_DEFAULT_ENTITY'), $langs->trans('SAMLCONNECTOR_USER_DEFAULT_ENTITYTooltip')).'</td>';
 	print '<td>';
 	if ($action == 'edit') {
