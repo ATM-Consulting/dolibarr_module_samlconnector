@@ -68,28 +68,26 @@ function copyToClipBoardAnimation(el, cpResult = true) {
 }
 
 $(document).ready(function() {
-    $('body').on('click', '.samlCopyClipboard', function() {
-        copyToClipBoardCommand($(this).find('span').text());
-        copyToClipBoardAnimation($(this));
-    });
+	// Handles the click on the clipboard copy button
+	$('body').on('click', '.samlCopyClipboard', function() {
+		copyToClipBoardCommand($(this).find('span').text());
+		copyToClipBoardAnimation($(this));
+	});
 
-// Sélecteur pour les deux états du bouton (on/off)
-	// On cible une classe commune 'ajax-toggle' qu'on ajoutera dans le PHP
-	$('#row_toggle_create_user').on('click', function() {
-		// Le nom de la constante que le bouton modifie
-		const code = 'SAMLCONNECTOR_CREATE_UNEXISTING_USER';
-		// On attache un écouteur de clic sur le document entier.
-		// Il s'activera SEULEMENT si l'élément cliqué est notre bouton "set".
-		// C'est la méthode la plus fiable.
-		$(document).on('click', '#set_' + code, function() {
-			// Le bouton "set" est cliqué (on active), donc ON AFFICHE les lignes.
-			$('#row_default_group, #row_default_entity').show();
-		});
-		// On fait de même pour le bouton "del".
-		$(document).on('click', '#del_' + code, function() {
-			// Le bouton "del" est cliqué (on désactive), donc ON CACHE les lignes.
-			$('#row_default_group, #row_default_entity').hide();
-		});
+	// --- Logic for the on/off toggle button ---
+	// The name of the constant that the button modifies
+	const code = 'SAMLCONNECTOR_CREATE_UNEXISTING_USER';
 
+	// Attach a click listener to the document.
+	// It will ONLY activate if the clicked element is our "set" button.
+	// This is the most reliable method, as it works even if the button is loaded dynamically.
+	$(document).on('click', '#set_' + code, function() {
+		// The "set" button is clicked (enabling the feature), so we SHOW the rows.
+		$('#row_default_group, #row_default_entity').show();
+	});
+	// We do the same for the "del" button.
+	$(document).on('click', '#del_' + code, function() {
+		// The "del" button is clicked (disabling the feature), so we HIDE the rows.
+		$('#row_default_group, #row_default_entity').hide();
 	});
 });

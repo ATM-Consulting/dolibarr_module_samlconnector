@@ -44,7 +44,6 @@ $value = GETPOST('value', 'alpha');
 $label = GETPOST('label', 'alpha');
 $scandir = GETPOST('scan_dir', 'alpha');
 
-// MODIFICATION : Séparation claire des types de champs pour éviter les conflits
 $mappingFields = [
 	'SAMLCONNECTOR_MAPPING_USER_LASTNAME' => ['type' => 'string', 'enabled' => 1],
 	'SAMLCONNECTOR_MAPPING_USER_FIRSTNAME' => ['type' => 'string', 'enabled' => 1],
@@ -81,11 +80,8 @@ $dirmodels = array_merge(['/'], $conf->modules_parts['models']);
 /*
  * Actions
  */
-// MODIFICATION : On fusionne tous les paramètres pour la sauvegarde
 $arrayofparameters = array_merge($arrayofparameters_search_key, $mappingFields, $globalFields);
-// On renomme la variable pour éviter toute confusion avec les boucles d'affichage
 include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
-// Le script include utilise la variable nommée $arrayofparameters, donc on doit la préparer juste avant
 /*
  * View
  */
@@ -106,7 +102,6 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 $head = samlconnectorAdminPrepareHead();
 print dol_get_fiche_head($head, 'samlSyncUsers', $langs->trans($page_name), -1, 'samlconnector@samlconnector');
 
-// AJOUT : Le formulaire est ouvert ici pour englober TOUS les champs en mode édition
 if ($action == 'edit') {
 	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 	print '<input type="hidden" name="token" value="'.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">';
@@ -125,7 +120,7 @@ print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_CREATE_UNEXISTING
 print '<td>'.ajax_constantonoff('SAMLCONNECTOR_CREATE_UNEXISTING_USER').'</td>';
 print '</tr>';
 
-$createUnexistingUser = !empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER);
+$createUnexistingUser = getDolGlobalString('SAMLCONNECTOR_CREATE_UNEXISTING_USER');
 $styleHidden = !$createUnexistingUser ? 'style="display: none;"' : '';
 // ... champ 'groupe par défaut'
 print '<tr class="oddeven" id="row_default_group" '.$styleHidden.'>';
@@ -207,11 +202,11 @@ if($action == 'edit') {
 
 				if($val['type'] == 'textarea') {
 					print '<textarea class="flat" name="'.$constname.'" id="'.$constname.'" cols="50" rows="5" wrap="soft">'."\n";
-					print $conf->global->{$constname};
+					print getDolGlobalString($constname);
 					print "</textarea>\n";
 				}
 				else if($val['type'] == 'securekey') {
-					print '<input required="required" type="text" class="flat" id="'.$constname.'" name="'.$constname.'" value="'.(GETPOST($constname, 'alpha') ? GETPOST($constname, 'alpha') : $conf->global->{$constname}).'" size="40">';
+					print '<input required="required" type="text" class="flat" id="'.$constname.'" name="'.$constname.'" value="'.(GETPOST($constname, 'alpha') ? GETPOST($constname, 'alpha') : getDolGlobalString($constname)).'" size="40">';
 					if(! empty($conf->use_javascript_ajax)) {
 						print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token'.$constname.'" class="linkobject"');
 					}
@@ -235,10 +230,10 @@ if($action == 'edit') {
 					$data = [];
 					foreach($val['data'] as $k => $v) $data[$k] = $langs->trans($k);
 
-					print Form::selectarray($constname, $data, $conf->global->$constname, 1);
+					print Form::selectarray($constname, $data, getDolGlobalString($constname), 1);
 				}
 				else {
-					print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth400' : $val['css']).'" value="'.$conf->global->{$constname}.'">';
+					print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth400' : $val['css']).'" value="'.getDolGlobalString($constname).'">';
 				}
 				print '</td></tr>';
 			}
@@ -278,13 +273,13 @@ else { // Mode lecture
 					print '</td><td>';
 
 					if($val['type'] == 'textarea') {
-						print dol_nl2br($conf->global->{$constname});
+						print dol_nl2br(getDolGlobalString($constname));
 					}
 					else if($val['type'] == 'array') {
-						if(!empty($conf->global->{$constname})) print $langs->trans($conf->global->{$constname});
+						if(getDolGlobalString($constname)) print $langs->trans(getDolGlobalString($constname));
 					}
 					else {
-						print $conf->global->{$constname};
+						print getDolGlobalString($constname);
 					}
 					print '</td></tr>';
 				}
