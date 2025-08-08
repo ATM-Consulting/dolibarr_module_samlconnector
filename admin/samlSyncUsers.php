@@ -183,15 +183,9 @@ if($action == 'edit') {
 		print $formSetup->generateOutput(true);
 	}
 	else {
-		// SUPPRESSION : Le formulaire est déjà ouvert plus haut
-		// print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-		// print '<input type="hidden" name="token" value="'.(empty($_SESSION['newtoken']) ? '' : $_SESSION['newtoken']).'">';
-		// print '<input type="hidden" name="action" value="update">';
-
 		print '<table class="noborder centpercent">';
 		print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
 
-		// MODIFICATION : La boucle ne parcourt QUE les champs du mapping pour éviter les conflits
 		foreach($mapping_display_params as $constname => $val) {
 			if($val['enabled'] == 1) {
 				$setupnotempty++;
@@ -244,8 +238,6 @@ if($action == 'edit') {
 		print '<input class="button button-save" type="submit" value="'.$langs->trans('Save').'">';
 		print '</div>';
 
-		// SUPPRESSION : Le formulaire sera fermé à la fin de la page
-		// print '</form>';
 	}
 
 	print '<br>';
@@ -258,12 +250,10 @@ else { // Mode lecture
 		}
 	}
 	else {
-		// En mode lecture, on affiche uniquement les paramètres du mapping car les globaux sont déjà affichés plus haut
 		if(! empty($mapping_display_params)) {
 			print '<table class="noborder centpercent">';
 			print '<tr class="liste_titre"><td style="width: 50%;">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
 
-			// MODIFICATION : La boucle ne parcourt QUE les champs du mapping
 			foreach($mapping_display_params as $constname => $val) {
 				if($val['enabled'] == 1) {
 					$setupnotempty++;
@@ -296,7 +286,6 @@ else { // Mode lecture
 	}
 }
 
-// AJOUT : On ferme le formulaire ici si on est en mode édition
 if ($action == 'edit') {
 	print '</form>';
 }
