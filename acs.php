@@ -27,6 +27,7 @@ global $db, $conf, $langs, $hookmanager;
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once __DIR__.'/lib/autoload.php';
+require_once __DIR__.'/class/samlConnectorTools.class.php';
 
 $fk_idp = intval(GETPOST('fk_idp', 'int'));
 
@@ -103,21 +104,27 @@ if($login->isAuthenticated()) {
         dol_syslog("This is a new started user session. _SESSION['dol_login']=".$_SESSION['dol_login'].' Session id='.session_id());
 
         $db->begin();
-		$hookmanager->initHooks(['login']);
-		$parameters = ['dol_authmode' => 'saml'];
-		$reshook = $hookmanager->executeHooks('afterLoginBeforeUpdateLastLoginDate', $parameters, $user, $action);
+
+		if (SamlConnectorTools::isFirstLogin($user)) {
+			if (!SamlConnectorTools::configureNewUser($user)) {
+				dol_syslog("asc.php - User configuration failed for '{$user->login}'. Transaction rolled back.", LOG_ERR);
+				setEventMessage($langs->trans("SamlConnectorErrorUserConfigFailed"), 'error');
+				$db->rollback();
+			}
+		}
 		$user->update_last_login_date();
 
-        $loginfo = 'TZ='.$_SESSION['dol_tz'].';TZString='.$_SESSION['dol_tz_string'].';Screen='.$_SESSION['dol_screenwidth'].'x'.$_SESSION['dol_screenheight'];
+		$loginfo = 'TZ='.$_SESSION['dol_tz'].';TZString='.$_SESSION['dol_tz_string'].';Screen='.$_SESSION['dol_screenwidth'].'x'.$_SESSION['dol_screenheight'];
 
-        // Call triggers for the "security events" log
-        $user->trigger_mesg = $loginfo;
-        // Call triggers
-        include_once DOL_DOCUMENT_ROOT.'/core/class/interfaces.class.php';
-        $interface = new Interfaces($db);
-        $result = $interface->run_triggers('USER_LOGIN', $user, $user, $langs, $conf);
+		// Call triggers for the "security events" log
+		$user->trigger_mesg = $loginfo;
+		// Call triggers
+		include_once DOL_DOCUMENT_ROOT.'/core/class/interfaces.class.php';
+		$interface = new Interfaces($db);
+		$result = $interface->run_triggers('USER_LOGIN', $user, $user, $langs, $conf);
 
-        $parameters = ['dol_authmode' => 'saml', 'dol_loginfo' => $loginfo];
+		$hookmanager->initHooks(['login']);
+		$parameters = ['dol_authmode' => 'saml', 'dol_loginfo' => $loginfo];
         $reshook = $hookmanager->executeHooks('afterLogin', $parameters, $user, $action);    // Note that $action and $object may have been modified by some hooks
 
         $db->commit();
