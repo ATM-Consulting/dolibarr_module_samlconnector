@@ -296,11 +296,13 @@ class ActionsSamlConnector {
 			$login = get_saml($fk_idp);
 			$login->logout($url);
 		}
+		return 0;
 	}
 
 	public function selectForFormsListWhere($parameters, &$object, &$action, $hookmanager) {
 		if($parameters['currentcontext'] == 'samlconnectorsetup') {
 			$this->resprints = ' WHERE t.active = 1';
 		}
+		return 0;
 	}
 }
