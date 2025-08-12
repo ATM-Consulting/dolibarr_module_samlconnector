@@ -72,13 +72,12 @@ if($login->isAuthenticated()) {
 
         $entityToConnect = GETPOSTISSET('entity') ? GETPOST('entity', 'int') : $user->entity;
         //Extract if transverse mode enabled we redirect on right entity
-        if (!empty(getDolGlobalInt('MULTICOMPANY_TRANSVERSE_MODE'))) {
+        if (getDolGlobalInt('MULTICOMPANY_TRANSVERSE_MODE')) {
             $sql = "SELECT uu.entity";
             $sql.= " FROM " . $db->prefix() . "usergroup_user as uu";
             $sql.= ", " . $db->prefix() . "entity as e";
             $sql.= " WHERE uu.entity = e.rowid AND e.visible < 2"; // Remove template of entity
-            $sql.= " AND uu.fk_user = " . $user->rowid;
-
+            $sql.= " AND uu.fk_user = " . $user->id;
             dol_syslog("functions_mc::check_user_password_mc sql=" . $sql, LOG_DEBUG);
             $result = $db->query($sql);
             if (!empty($result)) {
