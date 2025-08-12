@@ -6,7 +6,6 @@ class SamlConnectorTools
 	 * Handles the initial setup for a user upon their first login.
 	 *
 	 * This method orchestrates the assignment of a default entity and a default group.
-	 * It manages its own database transaction to ensure data integrity.
 	 *
 	 * @param   User    $userObject The user object to configure.
 	 * @return  bool                True on complete success, false on failure.
