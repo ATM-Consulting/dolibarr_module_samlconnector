@@ -52,6 +52,7 @@ if($login->isAuthenticated()) {
     if($res <= 0 && ! empty($conf->global->SAMLCONNECTOR_CREATE_UNEXISTING_USER)) {
         $user->login = $login->getNameId();
 		$user->create($admin);
+		SamlConnectorTools::configureNewUser($user);
     }
     elseif($res > 0 && ! empty($conf->global->SAMLCONNECTOR_UPDATE_USER_EVERYTIME)) {
         $user->update($admin);
@@ -101,13 +102,13 @@ if($login->isAuthenticated()) {
 
         $db->begin();
 
-		if (SamlConnectorTools::isFirstLogin($user)) {
-			if (!SamlConnectorTools::configureNewUser($user)) {
-				dol_syslog("asc.php - User configuration failed for '{$user->login}'. Transaction rolled back.", LOG_ERR);
-				setEventMessage($langs->trans("SamlConnectorErrorUserConfigFailed"), 'error');
-				$db->rollback();
-			}
-		}
+//		if (SamlConnectorTools::isFirstLogin($user)) {
+//			if (!SamlConnectorTools::configureNewUser($user)) {
+//				dol_syslog("asc.php - User configuration failed for '{$user->login}'. Transaction rolled back.", LOG_ERR);
+//				setEventMessage($langs->trans("SamlConnectorErrorUserConfigFailed"), 'error');
+//				$db->rollback();
+//			}
+//		}
 		$user->update_last_login_date();
 
 		$loginfo = 'TZ='.$_SESSION['dol_tz'].';TZString='.$_SESSION['dol_tz_string'].';Screen='.$_SESSION['dol_screenwidth'].'x'.$_SESSION['dol_screenheight'];
