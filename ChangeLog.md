@@ -1,7 +1,7 @@
 # CHANGELOG SAMLCONNECTOR FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
 ## 2.0
-- NEW : New user : Add conf group and entityu - *12/08/2025* - 2.2.0
+- NEW : New user : Add conf group and entity - *12/08/2025* - 2.2.0
 - FIX : Multicompany Management : Always redirect if transverse mode enabled - *12/08/2025* - 2.1.1
 - NEW : Multicompany Management : connect on the user's entity unless transverse mode is enabled, in which case we take the first entity in which the user is assigned to any group. - *19/12/2024* - 2.1.0
 - FIX : Disable admin on connection - *27/04/2023* - 2.0.5
