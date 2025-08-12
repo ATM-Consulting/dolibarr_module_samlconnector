@@ -146,7 +146,7 @@ if (isModEnabled('multicompany')) {
 	print '<td>'.$form->textwithpicto($langs->trans('SAMLCONNECTOR_USER_DEFAULT_ENTITY'), $langs->trans('SAMLCONNECTOR_USER_DEFAULT_ENTITYTooltip')).'</td>';
 	print '<td>';
 	if ($action == 'edit') {
-		print $mc->select_entities(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_ENTITY'), 'SAMLCONNECTOR_USER_DEFAULT_ENTITY');
+		print $mc->select_entities(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_ENTITY'), 'SAMLCONNECTOR_USER_DEFAULT_ENTITY', '', false, false, true);
 	} else {
 		if (! empty(getDolGlobalString('SAMLCONNECTOR_USER_DEFAULT_ENTITY'))) {
 			dol_buildpath('multicompany/class/dao_multicompany.class.php.');
