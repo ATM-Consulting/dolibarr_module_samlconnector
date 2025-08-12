@@ -33,29 +33,6 @@ class SamlConnectorTools
 		return true;
 	}
 	/**
-	 * Checks directly in the database whether the user has already logged in.
-	 * A user is considered "new" (first login) if their `datelastlogin` field is empty or NULL.
-	 *
-	 * @param   User    $userObject The user object to check.
-	 * @return  bool                true if this is the first login, false otherwise.
-	 */
-	public static function isFirstLogin(User $userObject) :bool
-	{
-		global $db;
-
-		$sql = "SELECT datelastlogin FROM " . $db->prefix() . "user";
-		$sql .= " WHERE rowid = " . $userObject->id;
-
-		$resql = $db->query($sql);
-		if ($resql) {
-			$obj = $db->fetch_object($resql);
-			if (empty($obj->datelastlogin)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	/**
 	 * Assigns a specific group to a user.
 	 *
 	 * @param   User    $userToUpdate     The user object to update.
@@ -63,7 +40,6 @@ class SamlConnectorTools
 	 * @param   int     $entityContextId  The ID of the context entity for the assignment.
 	 * @return  bool                      true on success, false on failure.
 	 */
-
 	public static function assignGroupToUser(User &$userToUpdate, $targetGroupId, $entityContextId) :bool
 	{
 		if ($userToUpdate->SetInGroup($targetGroupId, $entityContextId) > 0) {
